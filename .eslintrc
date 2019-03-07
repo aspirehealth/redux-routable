@@ -4,5 +4,8 @@
     "plugin:prettier/recommended",
     "plugin:jest/recommended"
   ],
+  "env": {
+    "browser": true
+  },
   "parser": "babel-eslint"
 }
