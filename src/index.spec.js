@@ -1,7 +1,6 @@
 import { createMemoryHistory } from 'history'
 import configureStore from 'redux-mock-store'
 import {
-  Fallback,
   NAVIGATE,
   Redirect,
   Route,
@@ -24,7 +23,7 @@ const router = Router([
   Route('item', '/item/:itemId'),
   Redirect('/product/:itemId', 'item'),
   Scope('/users', userRouter),
-  Fallback('notFound'),
+  Route('notFound'),
 ])
 
 const mocks = (initialEntries = []) => {

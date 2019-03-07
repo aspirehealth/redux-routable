@@ -50,15 +50,21 @@ const createInstance = (constructor, properties) => {
   return Object.assign(instance, properties)
 }
 
-export const Route = (name, path) => createInstance(Route, { name, path })
+export function Route(name, path) {
+  return createInstance(Route, { name, path })
+}
 
-export const Fallback = name => createInstance(Fallback, { name })
+export function Redirect(from, to) {
+  return createInstance(Redirect, { from, to })
+}
 
-export const Redirect = (from, to) => createInstance(Redirect, { from, to })
+export function Scope(base, router) {
+  return createInstance(Scope, { base, router })
+}
 
-export const Scope = (base, router) => createInstance(Scope, { base, router })
-
-export const Router = routes => createInstance(Router, { routes })
+export function Router(routes) {
+  return createInstance(Router, { routes })
+}
 
 // Middleware
 const getPathParamNames = path =>
