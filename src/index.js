@@ -94,6 +94,18 @@ export function Router(routes) {
   return create(Router, { routes: resolvedRoutes })
 }
 
+// Helpers
+export const routeReducer = (route, reducer) => (state, action) => {
+  if (action.type === ROUTE_CHANGED && action.payload.route === route) {
+    return reducer(state, action)
+  } else {
+    return state
+  }
+}
+
+export const isRouteAction = route => ({ type, payload }) =>
+  type === ROUTE_CHANGED && payload.route === route
+
 // Middleware
 const getPathParamNames = path =>
   pathToRegexp

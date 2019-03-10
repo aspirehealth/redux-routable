@@ -1,4 +1,5 @@
 import { createMemoryHistory } from 'history'
+import { applyMiddleware, createStore } from 'redux'
 import configureStore from 'redux-mock-store'
 import {
   Fallback,
@@ -10,10 +11,12 @@ import {
   go,
   goBack,
   goForward,
+  isRouteAction,
   open,
   push,
   replace,
   routeChanged,
+  routeReducer,
 } from './index'
 
 const usersRouter = Router([
@@ -74,6 +77,29 @@ describe('middleware', () => {
 
     store.dispatch(action)
     expect(store.getActions()).toEqual([action])
+  })
+})
+
+describe('helpers', () => {
+  test('routeReducer() creates a route-specific reducer', () => {
+    const reducer = routeReducer(
+      'item',
+      (state, { payload }) => payload.params.itemId,
+    )
+
+    const history = createMemoryHistory()
+    const middleware = createMiddleware(mockRouter, history)
+    const store = createStore(reducer, applyMiddleware(middleware))
+
+    store.dispatch(replace('item', { itemId: '123' }))
+    expect(store.getState()).toBe('123')
+  })
+
+  test('isRouteAction() creates a route-specific action filter', () => {
+    const isCartAction = isRouteAction('cart')
+
+    expect(isCartAction(routeChanged('home'))).toBe(false)
+    expect(isCartAction(routeChanged('cart'))).toBe(true)
   })
 })
 
