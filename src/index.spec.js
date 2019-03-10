@@ -1,6 +1,7 @@
 import { createMemoryHistory } from 'history'
 import configureStore from 'redux-mock-store'
 import {
+  Fallback,
   NAVIGATE,
   Redirect,
   Route,
@@ -10,10 +11,16 @@ import {
   replace,
 } from './index'
 
-const userRouter = Router([
-  Route('users', '/'),
-  Route('user', '/:userId'),
+const usersRouter = Router([
+  Route('users'),
   Route('userAdmin', '/admin'),
+  Route('user', '/:userId'),
+])
+
+const accountsRouter = Router([
+  Redirect('users'),
+  Redirect('userAdmin', '/admin'),
+  Redirect('user', '/:userId'),
 ])
 
 const router = Router([
@@ -21,9 +28,10 @@ const router = Router([
   Route('cart', '/cart'),
   Route('search', '/search/:category?'),
   Route('item', '/item/:itemId'),
-  Redirect('/product/:itemId', 'item'),
-  Scope('/users', userRouter),
-  Route('notFound'),
+  Redirect('item', '/product/:itemId'),
+  Scope('/users', usersRouter),
+  Scope('/accounts', accountsRouter),
+  Fallback('notFound'),
 ])
 
 const mocks = (initialEntries = []) => {
@@ -44,6 +52,9 @@ const CHANGING_LOCATION_TESTS = [
   ['/users', 'users', {}],
   ['/users/456', 'user', { userId: '456' }],
   ['/users/admin', 'userAdmin', {}],
+  ['/accounts', 'users', {}],
+  ['/accounts/456', 'user', { userId: '456' }],
+  ['/accounts/admin', 'userAdmin', {}],
   ['/nonsense', 'notFound', {}],
 ]
 

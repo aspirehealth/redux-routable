@@ -45,25 +45,45 @@ export const goForward = () => ({
 })
 
 // Router Configuration
-const createInstance = (constructor, properties) => {
+const create = (constructor, properties) => {
   const instance = Object.create(constructor.prototype)
   return Object.assign(instance, properties)
 }
 
-export function Route(name, path) {
-  return createInstance(Route, { name, path })
+export function Route(name, path = '') {
+  return create(Route, { name, path, pattern: pathToRegexp(path) })
 }
 
-export function Redirect(from, to) {
-  return createInstance(Redirect, { from, to })
+export function Redirect(to, path = '') {
+  return create(Redirect, { to, path, pattern: pathToRegexp(path) })
+}
+
+export function Fallback(name) {
+  return create(Fallback, { name })
 }
 
 export function Scope(base, router) {
-  return createInstance(Scope, { base, router })
+  const scopedRoutes = router.routes.map(route => {
+    switch (route.constructor) {
+      case Fallback:
+        throw Error('Fallbacks are not allowed within a Scope')
+      case Redirect:
+        return Redirect(route.to, base + route.path)
+      case Route:
+        return Route(route.name, base + route.path)
+    }
+  })
+
+  return create(Scope, { base, routes: scopedRoutes })
 }
 
 export function Router(routes) {
-  return createInstance(Router, { routes })
+  const resolvedRoutes = routes.reduce((routes, route) => {
+    const resolved = route instanceof Scope ? route.routes : [route]
+    return routes.concat(resolved)
+  }, [])
+
+  return create(Router, { routes: resolvedRoutes })
 }
 
 // Middleware
@@ -80,10 +100,18 @@ const keyFilter = (object, condition) =>
   }, {})
 
 const routeToLocation = (router, name, params) => {
-  const route = router.routes.find(route => route.name === name)
+  const route = router.routes.find(route => {
+    switch (route.constructor) {
+      case Fallback:
+      case Redirect:
+        return false
+      case Route:
+        return route.name === name
+    }
+  })
 
   if (!route) {
-    throw Error('No route found')
+    throw Error(`No route found with name "${name}"`)
   }
 
   const pathParamNames = getPathParamNames(route.path)
@@ -96,16 +124,26 @@ const routeToLocation = (router, name, params) => {
 }
 
 const locationToRoute = (router, location) => {
-  const match = route => pathToRegexp(route.path).test(location.pathname)
-  const route = router.routes.find(match)
+  const route = router.routes.find(route => {
+    switch (route.constructor) {
+      case Fallback:
+        return true
+      case Redirect:
+      case Route:
+        return route.pattern.test(location.pathname)
+    }
+  })
 
   if (!route) {
-    throw Error('No route found')
+    throw Error(`No route found matching location ${location.pathname}`)
   }
 
-  const pattern = pathToRegexp(route.path)
+  if (route instanceof Fallback) {
+    return { route, params: {} }
+  }
+
   const pathParamNames = getPathParamNames(route.path)
-  const pathParamValues = pattern.exec(location.pathname).slice(1)
+  const pathParamValues = route.pattern.exec(location.pathname).slice(1)
   const pathParams = pathParamNames.reduce((params, name, index) => {
     const value = pathParamValues[index]
     if (value !== undefined) params[name] = value
@@ -124,9 +162,12 @@ const isRelativeAction = ({ type }) => [GO, GO_BACK, GO_FORWARD].includes(type)
 export const createMiddleware = (router, history) => store => {
   history.listen(location => {
     const { route, params } = locationToRoute(router, location)
-    const action = navigate(route.name, params)
 
-    store.dispatch(action)
+    if (route instanceof Redirect) {
+      history.replace(routeToLocation(router, route.to, params))
+    } else {
+      store.dispatch(navigate(route.name, params))
+    }
   })
 
   return next => action => {
