@@ -110,7 +110,7 @@ const routeToLocation = (router, name, params) => {
     }
   })
 
-  if (!route) {
+  if (route === undefined) {
     throw Error(`No route found with name "${name}"`)
   }
 
@@ -134,7 +134,7 @@ const locationToRoute = (router, location) => {
     }
   })
 
-  if (!route) {
+  if (route === undefined) {
     throw Error(`No route found matching location ${location.pathname}`)
   }
 
