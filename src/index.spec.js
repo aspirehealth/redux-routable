@@ -52,19 +52,20 @@ const mocks = ({ historyOptions, router = mockRouter } = {}) => {
 describe('middleware', () => {
   test('does not allow navigation actions to pass through', () => {
     const { store } = mocks()
+    const actions = [
+      push('home'),
+      replace('home'),
+      open('home'),
+      go(-1),
+      goBack(),
+      goForward(),
+    ]
 
-    store.dispatch(push('home'))
-    expect(store.getActions()).not.toContainEqual([push('home')])
-    store.dispatch(replace('home'))
-    expect(store.getActions()).not.toContainEqual([replace('home')])
-    store.dispatch(open('home'))
-    expect(store.getActions()).not.toContainEqual([open('home')])
-    store.dispatch(go(-1))
-    expect(store.getActions()).not.toContainEqual([go(-1)])
-    store.dispatch(goBack())
-    expect(store.getActions()).not.toContainEqual([goBack()])
-    store.dispatch(goForward())
-    expect(store.getActions()).not.toContainEqual([goForward()])
+    actions.forEach(action => {
+      store.dispatch(action)
+      expect(store.getActions()).not.toContainEqual(action)
+      store.clearActions()
+    })
   })
 
   test('allows other actions to pass through', () => {
@@ -148,27 +149,27 @@ describe('an error is thrown', () => {
   })
 })
 
-const LOCATION_CHANGE_TESTS = [
-  ['', 'home', {}],
-  ['/', 'home', {}],
-  ['/cart', 'cart', {}],
-  ['/search', 'search', {}],
-  ['/search?query=devices', 'search', { query: 'devices' }],
-  ['/search/widgets', 'search', { category: 'widgets' }],
-  ['/item/123', 'item', { itemId: '123' }],
-  ['/item', 'notFound', {}],
-  ['/product/123', 'item', { itemId: '123' }],
-  ['/users', 'users', {}],
-  ['/users/456', 'user', { userId: '456' }],
-  ['/users/admin', 'userAdmin', {}],
-  ['/accounts', 'users', {}],
-  ['/accounts/456', 'user', { userId: '456' }],
-  ['/accounts/admin', 'userAdmin', {}],
-  ['/nonsense', 'notFound', {}],
-]
-
 describe('changing the location', () => {
-  LOCATION_CHANGE_TESTS.forEach(([path, route, params]) => {
+  const tests = [
+    ['', 'home', {}],
+    ['/', 'home', {}],
+    ['/cart', 'cart', {}],
+    ['/search', 'search', {}],
+    ['/search?query=devices', 'search', { query: 'devices' }],
+    ['/search/widgets', 'search', { category: 'widgets' }],
+    ['/item/123', 'item', { itemId: '123' }],
+    ['/item', 'notFound', {}],
+    ['/product/123', 'item', { itemId: '123' }],
+    ['/users', 'users', {}],
+    ['/users/456', 'user', { userId: '456' }],
+    ['/users/admin', 'userAdmin', {}],
+    ['/accounts', 'users', {}],
+    ['/accounts/456', 'user', { userId: '456' }],
+    ['/accounts/admin', 'userAdmin', {}],
+    ['/nonsense', 'notFound', {}],
+  ]
+
+  tests.forEach(([path, route, params]) => {
     test(`dispatches correct action when changed to '${path}'`, () => {
       const { store, history } = mocks()
       const action = routeChanged(route, params)
@@ -179,20 +180,20 @@ describe('changing the location', () => {
   })
 })
 
-const ACTION_DISPATCH_TESTS = [
-  ['home', undefined, '/'],
-  ['cart', undefined, '/cart'],
-  ['search', undefined, '/search'],
-  ['search', { query: 'devices' }, '/search?query=devices'],
-  ['search', { category: 'widgets' }, '/search/widgets'],
-  ['item', { itemId: '123' }, '/item/123'],
-  ['users', undefined, '/users'],
-  ['user', { userId: '456' }, '/users/456'],
-  ['userAdmin', undefined, '/users/admin'],
-]
-
 describe('dispatching an action', () => {
-  ACTION_DISPATCH_TESTS.forEach(([route, params, path]) => {
+  const tests = [
+    ['home', undefined, '/'],
+    ['cart', undefined, '/cart'],
+    ['search', undefined, '/search'],
+    ['search', { query: 'devices' }, '/search?query=devices'],
+    ['search', { category: 'widgets' }, '/search/widgets'],
+    ['item', { itemId: '123' }, '/item/123'],
+    ['users', undefined, '/users'],
+    ['user', { userId: '456' }, '/users/456'],
+    ['userAdmin', undefined, '/users/admin'],
+  ]
+
+  tests.forEach(([route, params, path]) => {
     test(`changes location to '${path}'`, () => {
       const { store, history } = mocks()
 
