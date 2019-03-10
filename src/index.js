@@ -2,7 +2,7 @@ import pathToRegexp from 'path-to-regexp'
 import queryString from 'query-string'
 
 // Action Types
-export const NAVIGATE = '@@reduxRouter/NAVIGATE'
+export const ROUTE_CHANGED = '@@reduxRouter/ROUTE_CHANGED'
 const PUSH = '@@reduxRouter/PUSH'
 const REPLACE = '@@reduxRouter/REPLACE'
 const OPEN = '@@reduxRouter/OPEN'
@@ -11,8 +11,8 @@ const GO_BACK = '@@reduxRouter/GO_BACK'
 const GO_FORWARD = '@@reduxRouter/GO_FORWARD'
 
 // Action Creators
-const navigate = (route, params) => ({
-  type: NAVIGATE,
+const routeChanged = (route, params) => ({
+  type: ROUTE_CHANGED,
   payload: { route, params },
 })
 
@@ -166,7 +166,7 @@ export const createMiddleware = (router, history) => store => {
     if (route instanceof Redirect) {
       history.replace(routeToLocation(router, route.to, params))
     } else {
-      store.dispatch(navigate(route.name, params))
+      store.dispatch(routeChanged(route.name, params))
     }
   })
 

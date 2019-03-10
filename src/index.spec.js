@@ -2,7 +2,7 @@ import { createMemoryHistory } from 'history'
 import configureStore from 'redux-mock-store'
 import {
   Fallback,
-  NAVIGATE,
+  ROUTE_CHANGED,
   Redirect,
   Route,
   Router,
@@ -62,7 +62,7 @@ describe('changing location', () => {
   CHANGING_LOCATION_TESTS.forEach(([path, route, params]) => {
     test(`dispatches correct action when changed to '${path}'`, () => {
       const { store, history } = mocks()
-      const action = { type: NAVIGATE, payload: { route, params } }
+      const action = { type: ROUTE_CHANGED, payload: { route, params } }
 
       history.replace(path)
       expect(store.getActions()).toEqual([action])
