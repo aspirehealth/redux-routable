@@ -11,7 +11,7 @@ const GO_BACK = '@@reduxRouter/GO_BACK'
 const GO_FORWARD = '@@reduxRouter/GO_FORWARD'
 
 // Action Creators
-const routeChanged = (route, params) => ({
+export const routeChanged = (route, params) => ({
   type: ROUTE_CHANGED,
   payload: { route, params },
 })
@@ -66,7 +66,7 @@ export function Scope(base, router) {
   const scopedRoutes = router.routes.map(route => {
     switch (route.constructor) {
       case Fallback:
-        throw Error('Fallbacks are not allowed within a Scope')
+        throw Error('A Fallback is not allowed within a Scope')
       case Redirect:
         return Redirect(route.to, base + route.path)
       case Route:
@@ -79,8 +79,16 @@ export function Scope(base, router) {
 
 export function Router(routes) {
   const resolvedRoutes = routes.reduce((routes, route) => {
-    const resolved = route instanceof Scope ? route.routes : [route]
-    return routes.concat(resolved)
+    switch (route.constructor) {
+      case Router:
+        throw Error('A Router is not allowed within a Router')
+      case Scope:
+        return routes.concat(route.routes)
+      case Fallback:
+      case Redirect:
+      case Route:
+        return routes.concat([route])
+    }
   }, [])
 
   return create(Router, { routes: resolvedRoutes })
@@ -111,7 +119,7 @@ const routeToLocation = (router, name, params) => {
   })
 
   if (route === undefined) {
-    throw Error(`No route found with name "${name}"`)
+    throw Error(`No route found with name '${name}'`)
   }
 
   const pathParamNames = getPathParamNames(route.path)
@@ -135,7 +143,7 @@ const locationToRoute = (router, location) => {
   })
 
   if (route === undefined) {
-    throw Error(`No route found matching location ${location.pathname}`)
+    throw Error(`No route found matching location '${location.pathname}'`)
   }
 
   if (route instanceof Fallback) {
