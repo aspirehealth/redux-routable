@@ -17,6 +17,7 @@ import {
   replace,
   routeChanged,
   routeReducer,
+  sync,
 } from './index'
 
 const usersRouter = Router([
@@ -104,6 +105,15 @@ describe('helpers', () => {
 })
 
 describe('side effects', () => {
+  test('dispatching SYNC action dispatches ROUTE_CHANGED action for current location', () => {
+    const historyOptions = { initialEntries: ['/item/123'] }
+    const { store } = mocks({ historyOptions })
+    const action = routeChanged('item', { itemId: '123' })
+
+    store.dispatch(sync())
+    expect(store.getActions()).toEqual([action])
+  })
+
   test('dispatching PUSH action adds entry to history stack', () => {
     const { store, history } = mocks()
 

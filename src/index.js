@@ -2,18 +2,18 @@ import pathToRegexp from 'path-to-regexp'
 import queryString from 'query-string'
 
 // Action Types
-export const ROUTE_CHANGED = '@@reduxRouter/ROUTE_CHANGED'
+const SYNC = '@@reduxRouter/SYNC'
 const PUSH = '@@reduxRouter/PUSH'
 const REPLACE = '@@reduxRouter/REPLACE'
 const OPEN = '@@reduxRouter/OPEN'
 const GO = '@@reduxRouter/GO'
 const GO_BACK = '@@reduxRouter/GO_BACK'
 const GO_FORWARD = '@@reduxRouter/GO_FORWARD'
+export const ROUTE_CHANGED = '@@reduxRouter/ROUTE_CHANGED'
 
 // Action Creators
-export const routeChanged = (route, params) => ({
-  type: ROUTE_CHANGED,
-  payload: { route, params },
+export const sync = () => ({
+  type: SYNC,
 })
 
 export const push = (route, params = {}) => ({
@@ -42,6 +42,11 @@ export const goBack = () => ({
 
 export const goForward = () => ({
   type: GO_FORWARD,
+})
+
+export const routeChanged = (route, params) => ({
+  type: ROUTE_CHANGED,
+  payload: { route, params },
 })
 
 // Router Configuration
@@ -180,7 +185,7 @@ const isAbsoluteAction = ({ type }) => [PUSH, REPLACE, OPEN].includes(type)
 const isRelativeAction = ({ type }) => [GO, GO_BACK, GO_FORWARD].includes(type)
 
 export const createMiddleware = (router, history) => store => {
-  history.listen(location => {
+  const historyListener = location => {
     const { route, params } = locationToRoute(router, location)
 
     if (route instanceof Redirect) {
@@ -188,10 +193,14 @@ export const createMiddleware = (router, history) => store => {
     } else {
       store.dispatch(routeChanged(route.name, params))
     }
-  })
+  }
+
+  history.listen(historyListener)
 
   return next => action => {
-    if (isAbsoluteAction(action)) {
+    if (action.type === SYNC) {
+      historyListener(history.location)
+    } else if (isAbsoluteAction(action)) {
       const { route, params } = action.payload
       const location = routeToLocation(router, route, params)
 
