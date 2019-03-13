@@ -100,9 +100,16 @@ export function Router(routes) {
 }
 
 // Helpers
-export const routeReducer = (route, reducer) => (state, action) => {
-  if (action.type === ROUTE_CHANGED && action.payload.route === route) {
-    return reducer(state, action)
+export const routeReducer = (route, reducer, empty = null) => (
+  state,
+  action,
+) => {
+  if (action.type === ROUTE_CHANGED) {
+    if (action.payload.route === route) {
+      return reducer(state, action)
+    } else {
+      return empty
+    }
   } else {
     return state
   }

@@ -94,9 +94,11 @@ describe('helpers', () => {
 
     store.dispatch(replace('item', { itemId: '123' }))
     expect(store.getState()).toBe('123')
+    store.dispatch(replace('home'))
+    expect(store.getState()).toBe(null)
   })
 
-  test('isRouteAction() creates a route-specific action filter', () => {
+  test('isRouteAction() creates a route-specific action predicate', () => {
     const isCartAction = isRouteAction('cart')
 
     expect(isCartAction(routeChanged('home'))).toBe(false)
