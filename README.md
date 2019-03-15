@@ -86,7 +86,7 @@ Dispatching the `SYNC` action will cause a `ROUTE_CHANGED` action to be
 dispatched that corresponds to the current location:
 
 ```javascript
-{ type: ROUTE_CHANGED, payload: { route: 'home', params: {} }
+{ type: ROUTE_CHANGED, payload: { route: 'home', params: {}, hash: '' } }
 ```
 
 Since we're using `createMemoryHistory`, the location defaults to `/`, and the
@@ -113,7 +113,7 @@ This will do 2 things:
 2. A `ROUTE_CHANGED` action will be dispatched:
 
 ```javascript
-{ type: ROUTE_CHANGED, payload: { route: 'user', params: {} }
+{ type: ROUTE_CHANGED, payload: { route: 'user', params: {}, hash: '' } }
 ```
 
 All the other navigation actions (with the exception of `OPEN`) will have the
@@ -266,8 +266,9 @@ the middleware, so they will never reach your reducers or other middleware.
   {
     type: ROUTE_CHANGED,
     payload: {
-      route, // Route name
-      params: { ... } // Path and query params, string values
+      route: ..., // Route name
+      params: { ... }, // Path and query params, string values
+      hash: ... // Fragment identifier
     }
   }
   ```

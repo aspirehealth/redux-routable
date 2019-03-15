@@ -16,19 +16,19 @@ export const sync = () => ({
   type: SYNC,
 })
 
-export const push = (route, params = {}) => ({
+export const push = (route, params = {}, hash = '') => ({
   type: PUSH,
-  payload: { route, params },
+  payload: { route, params, hash },
 })
 
-export const replace = (route, params = {}) => ({
+export const replace = (route, params = {}, hash = '') => ({
   type: REPLACE,
-  payload: { route, params },
+  payload: { route, params, hash },
 })
 
-export const open = (route, params = {}) => ({
+export const open = (route, params = {}, hash = '') => ({
   type: OPEN,
-  payload: { route, params },
+  payload: { route, params, hash },
 })
 
 export const go = offset => ({
@@ -44,9 +44,9 @@ export const goForward = () => ({
   type: GO_FORWARD,
 })
 
-export const routeChanged = (route, params) => ({
+export const routeChanged = (route, params, hash) => ({
   type: ROUTE_CHANGED,
-  payload: { route, params },
+  payload: { route, params, hash },
 })
 
 // Router Configuration
@@ -131,7 +131,7 @@ const keyFilter = (object, condition) =>
     return params
   }, {})
 
-const routeToLocation = (router, name, params) => {
+const routeToLocation = (router, name, params, hash) => {
   const route = router.routes.find(route => {
     switch (route.constructor) {
       case Fallback:
@@ -152,39 +152,39 @@ const routeToLocation = (router, name, params) => {
   const pathname = pathToRegexp.compile(route.path)(pathParams)
   const search = queryString.stringify(queryParams)
 
-  return { pathname, search }
+  return { pathname, search, hash }
 }
 
-const locationToRoute = (router, location) => {
+const locationToRoute = (router, { pathname, search, hash }) => {
   const route = router.routes.find(route => {
     switch (route.constructor) {
       case Fallback:
         return true
       case Redirect:
       case Route:
-        return route.pattern.test(location.pathname)
+        return route.pattern.test(pathname)
     }
   })
 
   if (route === undefined) {
-    throw Error(`No route found matching location '${location.pathname}'`)
+    throw Error(`No route found matching path '${pathname}'`)
   }
 
   if (route instanceof Fallback) {
-    return { route, params: {} }
+    return { route, params: {}, hash }
   }
 
   const pathParamNames = getPathParamNames(route.path)
-  const pathParamValues = route.pattern.exec(location.pathname).slice(1)
+  const pathParamValues = route.pattern.exec(pathname).slice(1)
   const pathParams = pathParamNames.reduce((params, name, index) => {
     const value = pathParamValues[index]
     if (value !== undefined) params[name] = value
     return params
   }, {})
-  const queryParams = queryString.parse(location.search)
+  const queryParams = queryString.parse(search)
   const params = { ...pathParams, ...queryParams }
 
-  return { route, params }
+  return { route, params, hash }
 }
 
 const isAbsoluteAction = ({ type }) => [PUSH, REPLACE, OPEN].includes(type)
@@ -193,12 +193,12 @@ const isRelativeAction = ({ type }) => [GO, GO_BACK, GO_FORWARD].includes(type)
 
 export const createMiddleware = (router, history) => store => {
   const historyListener = location => {
-    const { route, params } = locationToRoute(router, location)
+    const { route, params, hash } = locationToRoute(router, location)
 
     if (route instanceof Redirect) {
-      history.replace(routeToLocation(router, route.to, params))
+      history.replace(routeToLocation(router, route.to, params, hash))
     } else {
-      store.dispatch(routeChanged(route.name, params))
+      store.dispatch(routeChanged(route.name, params, hash))
     }
   }
 
@@ -208,8 +208,8 @@ export const createMiddleware = (router, history) => store => {
     if (action.type === SYNC) {
       historyListener(history.location)
     } else if (isAbsoluteAction(action)) {
-      const { route, params } = action.payload
-      const location = routeToLocation(router, route, params)
+      const { route, params, hash } = action.payload
+      const location = routeToLocation(router, route, params, hash)
 
       switch (action.type) {
         case PUSH:

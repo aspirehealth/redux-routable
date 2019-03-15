@@ -1,4 +1,4 @@
-import { createMemoryHistory } from 'history'
+import { createMemoryHistory, createPath } from 'history'
 import { applyMiddleware, createStore } from 'redux'
 import configureStore from 'redux-mock-store'
 import {
@@ -110,7 +110,7 @@ describe('side effects', () => {
   test('dispatching SYNC action dispatches ROUTE_CHANGED action for current location', () => {
     const historyOptions = { initialEntries: ['/item/123'] }
     const { store } = mocks({ historyOptions })
-    const action = routeChanged('item', { itemId: '123' })
+    const action = routeChanged('item', { itemId: '123' }, '')
 
     store.dispatch(sync())
     expect(store.getActions()).toEqual([action])
@@ -189,28 +189,29 @@ describe('an error is thrown', () => {
 
 describe('changing the location', () => {
   const tests = [
-    ['', 'home', {}],
-    ['/', 'home', {}],
-    ['/cart', 'cart', {}],
-    ['/search', 'search', {}],
-    ['/search?query=devices', 'search', { query: 'devices' }],
-    ['/search/widgets', 'search', { category: 'widgets' }],
-    ['/item/123', 'item', { itemId: '123' }],
-    ['/item', 'notFound', {}],
-    ['/product/123', 'item', { itemId: '123' }],
-    ['/users', 'users', {}],
-    ['/users/456', 'user', { userId: '456' }],
-    ['/users/admin', 'userAdmin', {}],
-    ['/accounts', 'users', {}],
-    ['/accounts/456', 'user', { userId: '456' }],
-    ['/accounts/admin', 'userAdmin', {}],
-    ['/nonsense', 'notFound', {}],
+    ['', 'home', {}, ''],
+    ['/', 'home', {}, ''],
+    ['/cart', 'cart', {}, ''],
+    ['/search', 'search', {}, ''],
+    ['/search/widgets', 'search', { category: 'widgets' }, ''],
+    ['/search?query=devices', 'search', { query: 'devices' }, ''],
+    ['/search#items', 'search', {}, '#items'],
+    ['/item/123', 'item', { itemId: '123' }, ''],
+    ['/item', 'notFound', {}, ''],
+    ['/product/123', 'item', { itemId: '123' }, ''],
+    ['/users', 'users', {}, ''],
+    ['/users/456', 'user', { userId: '456' }, ''],
+    ['/users/admin', 'userAdmin', {}, ''],
+    ['/accounts', 'users', {}, ''],
+    ['/accounts/456', 'user', { userId: '456' }, ''],
+    ['/accounts/admin', 'userAdmin', {}, ''],
+    ['/nonsense', 'notFound', {}, ''],
   ]
 
-  tests.forEach(([path, route, params]) => {
+  tests.forEach(([path, route, params, hash]) => {
     test(`dispatches correct action when changed to '${path}'`, () => {
       const { store, history } = mocks()
-      const action = routeChanged(route, params)
+      const action = routeChanged(route, params, hash)
 
       history.replace(path)
       expect(store.getActions()).toEqual([action])
@@ -220,23 +221,24 @@ describe('changing the location', () => {
 
 describe('dispatching an action', () => {
   const tests = [
-    ['home', undefined, '/'],
-    ['cart', undefined, '/cart'],
-    ['search', undefined, '/search'],
-    ['search', { query: 'devices' }, '/search?query=devices'],
-    ['search', { category: 'widgets' }, '/search/widgets'],
-    ['item', { itemId: '123' }, '/item/123'],
-    ['users', undefined, '/users'],
-    ['user', { userId: '456' }, '/users/456'],
-    ['userAdmin', undefined, '/users/admin'],
+    ['home', undefined, undefined, '/'],
+    ['cart', undefined, undefined, '/cart'],
+    ['search', undefined, undefined, '/search'],
+    ['search', { category: 'widgets' }, undefined, '/search/widgets'],
+    ['search', { query: 'devices' }, undefined, '/search?query=devices'],
+    ['search', undefined, '#items', '/search#items'],
+    ['item', { itemId: '123' }, undefined, '/item/123'],
+    ['users', undefined, undefined, '/users'],
+    ['user', { userId: '456' }, undefined, '/users/456'],
+    ['userAdmin', undefined, undefined, '/users/admin'],
   ]
 
-  tests.forEach(([route, params, path]) => {
+  tests.forEach(([route, params, hash, path]) => {
     test(`changes location to '${path}'`, () => {
       const { store, history } = mocks()
 
-      store.dispatch(replace(route, params))
-      expect(history.location.pathname + history.location.search).toBe(path)
+      store.dispatch(replace(route, params, hash))
+      expect(createPath(history.location)).toBe(path)
     })
   })
 })
