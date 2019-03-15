@@ -43,7 +43,7 @@ const router = Router([
   Scope('/user', Router([
     Route('user', '/:id'),
     Route('friends', '/:id/friends'),
-  ]))
+  ])),
   Redirect('user', '/profile/:id'),
   Fallback('notFound')
 ])
@@ -169,25 +169,26 @@ The router configuration constructors return objects that hold information about
 how to route in your application. Their purpose is to provide declarative
 configuration for the middleware.
 
-- `Route(name, [path])`
+- `Route(name, [path=''])`
 
-  A `Route` will match when the location matches the pattern given by `path`.
+  A `Route` will match when the entire location matches the pattern given by
+  `path`.
 
-- `Redirect(to, [path])`
+- `Redirect(to, [path=''])`
 
-  A `Redirect` will match when the location matches the pattern given by `path`,
-  but the middleware will redirect to the route referenced by `to`.
+  A `Redirect` will match when the entire location matches the pattern given by
+  `path`, but the middleware will redirect to the route referenced by `to`.
 
-- `Fallback(name)`
+- `Fallback(name, [path=''])`
 
-  A `Fallback` will always match, and you cannot put it within a `Scope`, so if
-  you have a `Fallback`, it should be the very last item in the outermost
-  `Router`.
+  A `Fallback` will match when the beginning of the location matches the pattern
+  given by `path`. Since `path` defaults to `''`, if no path is provided, it
+  will always match.
 
 - `Scope(base, router)`
 
-  A `Scope` allows you to nest a `Router` within another `Router` while adding a
-  prefix ("scoping") to the routes of the inner `Router`.
+  A `Scope` allows you to nest a `Router` within another `Router` by prepending
+  a base path to the `path` of each of the routes of the inner `Router`.
 
 - `Router(routes)`
 
@@ -195,7 +196,7 @@ configuration for the middleware.
   routing with your application. When the location changes, the location will be
   matched against each route in order until a match is found.
 
-The `path` parameter of `Route` and `Redirect` is matched with
+The `path` parameter of `Route`, `Redirect`, and `Fallback` is matched with
 [`path-to-regexp`](https://www.npmjs.com/package/path-to-regexp). Refer to their
 documentation for path syntax.
 
@@ -221,17 +222,17 @@ the middleware, so they will never reach your reducers or other middleware.
 
 #### Navigation Action Creators
 
-- `push(route, [params])`
+- `push(route, [params={}], [hash=''])`
 
   Dispatching this action will change the location to match the specified
   `route`, pushing a new entry onto the history stack.
 
-- `replace(route, [params])`
+- `replace(route, [params={}], [hash=''])`
 
   Dispatching this action will change the location to match the specified
   `route`, replacing the current entry on the history stack.
 
-- `open(route, [params])`
+- `open(route, [params={}], [hash=''])`
 
   Dispatching this action will open a new window or tab to the location
   specified by `route`.
