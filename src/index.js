@@ -63,15 +63,16 @@ export function Redirect(to, path = '') {
   return create(Redirect, { to, path, pattern: pathToRegexp(path) })
 }
 
-export function Fallback(name) {
-  return create(Fallback, { name })
+export function Fallback(name, path = '') {
+  const pattern = pathToRegexp(path, null, { end: false })
+  return create(Fallback, { name, path: '', pattern })
 }
 
 export function Scope(base, router) {
   const scopedRoutes = router.routes.map(route => {
     switch (route.constructor) {
       case Fallback:
-        throw Error('A Fallback is not allowed within a Scope')
+        return Fallback(route.name, base + route.path)
       case Redirect:
         return Redirect(route.to, base + route.path)
       case Route:
@@ -132,15 +133,9 @@ const keyFilter = (object, condition) =>
   }, {})
 
 const routeToLocation = (router, name, params, hash) => {
-  const route = router.routes.find(route => {
-    switch (route.constructor) {
-      case Fallback:
-      case Redirect:
-        return false
-      case Route:
-        return route.name === name
-    }
-  })
+  const route = router.routes.find(
+    route => route instanceof Route && route.name === name,
+  )
 
   if (route === undefined) {
     throw Error(`No route found with name '${name}'`)
@@ -156,22 +151,10 @@ const routeToLocation = (router, name, params, hash) => {
 }
 
 const locationToRoute = (router, { pathname, search, hash }) => {
-  const route = router.routes.find(route => {
-    switch (route.constructor) {
-      case Fallback:
-        return true
-      case Redirect:
-      case Route:
-        return route.pattern.test(pathname)
-    }
-  })
+  const route = router.routes.find(route => route.pattern.test(pathname))
 
   if (route === undefined) {
     throw Error(`No route found matching path '${pathname}'`)
-  }
-
-  if (route instanceof Fallback) {
-    return { route, params: {}, hash }
   }
 
   const pathParamNames = getPathParamNames(route.path)

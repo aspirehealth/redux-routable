@@ -32,6 +32,11 @@ const accountsRouter = Router([
   Redirect('user', '/:userId'),
 ])
 
+const contactRouter = Router([
+  Route('contactByEmail', '/email'),
+  Fallback('contactNotFound'),
+])
+
 const mockRouter = Router([
   Route('home', '/'),
   Route('cart', '/cart'),
@@ -40,6 +45,7 @@ const mockRouter = Router([
   Redirect('item', '/product/:itemId'),
   Scope('/users', usersRouter),
   Scope('/accounts', accountsRouter),
+  Scope('/contact', contactRouter),
   Fallback('notFound'),
 ])
 
@@ -168,10 +174,6 @@ describe('side effects', () => {
 })
 
 describe('an error is thrown', () => {
-  test('when putting a Fallback in a Scope', () => {
-    expect(() => Scope('/test', Router([Fallback('test')]))).toThrow()
-  })
-
   test('when putting a Router in a Router', () => {
     expect(() => Router([Router([])])).toThrow()
   })
@@ -205,6 +207,8 @@ describe('changing the location', () => {
     ['/accounts', 'users', {}, ''],
     ['/accounts/456', 'user', { userId: '456' }, ''],
     ['/accounts/admin', 'userAdmin', {}, ''],
+    ['/contact/email', 'contactByEmail', {}, ''],
+    ['/contact/nonsense', 'contactNotFound', {}, ''],
     ['/nonsense', 'notFound', {}, ''],
   ]
 
@@ -231,6 +235,7 @@ describe('dispatching an action', () => {
     ['users', undefined, undefined, '/users'],
     ['user', { userId: '456' }, undefined, '/users/456'],
     ['userAdmin', undefined, undefined, '/users/admin'],
+    ['contactByEmail', undefined, undefined, '/contact/email'],
   ]
 
   tests.forEach(([route, params, hash, path]) => {
