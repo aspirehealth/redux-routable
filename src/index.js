@@ -101,15 +101,15 @@ export function Router(routes) {
 }
 
 // Helpers
-export const routeReducer = (route, reducer, empty = null) => (
-  state,
-  action,
+export const paramsReducer = (route, defaultVal, paramsSelector) => (
+  state = defaultVal,
+  { type, payload },
 ) => {
-  if (action.type === ROUTE_CHANGED) {
-    if (action.payload.route === route) {
-      return reducer(state, action)
+  if (type === ROUTE_CHANGED) {
+    if (payload.route === route) {
+      return paramsSelector(payload.params)
     } else {
-      return empty
+      return defaultVal
     }
   } else {
     return state

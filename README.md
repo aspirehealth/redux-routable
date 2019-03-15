@@ -146,9 +146,9 @@ const reducer = (state, { type, payload }) => {
 This use case is common enough that Redux Routable provides a helper for it:
 
 ```javascript
-import { routeReducer } from '@redux-routable/core'
+import { paramsReducer } from '@redux-routable/core'
 
-const reducer = routeReducer('user', (state, { payload }) => payload.params.id)
+const reducer = paramsReducer('user', null, ({ id }) => id)
 ```
 
 You can handle `ROUTE_CHANGED` actions however you'd like. You'll likely want to
@@ -283,12 +283,12 @@ the middleware, so they will never reach your reducers or other middleware.
 
 ### Helpers
 
-- `routeReducer(route, reducer, [empty=null])`
+- `paramsReducer(route, defaultVal, paramsSelector)`
 
-  This function takes a `route` name, a `reducer` function, and an optional
-  `empty` value. It returns a reducer that evaluates the `reducer` function when
-  the `route` is navigated to and returns `empty` when the `route` is navigated
-  away.
+  This function creates a reducer that evaluates `paramsSelector` against the
+  `payload.params` of a `ROUTE_CHANGED` action for the specified `route`. Before
+  the specified `route` is navigated to and when it is navigated away from, the
+  reducer will evaluate to `defaultVal`.
 
 - `isRouteAction(route)`
 

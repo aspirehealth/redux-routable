@@ -13,10 +13,10 @@ import {
   goForward,
   isRouteAction,
   open,
+  paramsReducer,
   push,
   replace,
   routeChanged,
-  routeReducer,
   sync,
 } from './index'
 
@@ -88,16 +88,13 @@ describe('middleware', () => {
 })
 
 describe('helpers', () => {
-  test('routeReducer() creates a route-specific reducer', () => {
-    const reducer = routeReducer(
-      'item',
-      (state, { payload }) => payload.params.itemId,
-    )
-
+  test('paramsReducer() creates a route-specific reducer for params', () => {
+    const reducer = paramsReducer('item', null, ({ itemId }) => itemId)
     const history = createMemoryHistory()
     const middleware = createMiddleware(mockRouter, history)
     const store = createStore(reducer, applyMiddleware(middleware))
 
+    expect(store.getState()).toBe(null)
     store.dispatch(replace('item', { itemId: '123' }))
     expect(store.getState()).toBe('123')
     store.dispatch(replace('home'))
