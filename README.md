@@ -45,7 +45,7 @@ const router = Router([
     Route('friends', '/:id/friends'),
   ])),
   Redirect('user', '/profile/:id'),
-  Fallback('notFound')
+  Fallback('notFound'),
 ])
 ```
 

@@ -20,13 +20,13 @@ import {
   sync,
 } from './index'
 
-const usersRouter = Router([
+const userRouter = Router([
   Route('users'),
   Route('userAdmin', '/admin'),
   Route('user', '/:userId'),
 ])
 
-const accountsRouter = Router([
+const accountRouter = Router([
   Redirect('users'),
   Redirect('userAdmin', '/admin'),
   Redirect('user', '/:userId'),
@@ -43,8 +43,8 @@ const mockRouter = Router([
   Route('search', '/search/:category?'),
   Route('item', '/item/:itemId'),
   Redirect('item', '/product/:itemId'),
-  Scope('/users', usersRouter),
-  Scope('/accounts', accountsRouter),
+  Scope('/user', userRouter),
+  Scope('/account', accountRouter),
   Scope('/contact', contactRouter),
   Fallback('notFound'),
 ])
@@ -201,12 +201,12 @@ describe('changing the location', () => {
     ['/item/123', 'item', { itemId: '123' }, ''],
     ['/item', 'notFound', {}, ''],
     ['/product/123', 'item', { itemId: '123' }, ''],
-    ['/users', 'users', {}, ''],
-    ['/users/456', 'user', { userId: '456' }, ''],
-    ['/users/admin', 'userAdmin', {}, ''],
-    ['/accounts', 'users', {}, ''],
-    ['/accounts/456', 'user', { userId: '456' }, ''],
-    ['/accounts/admin', 'userAdmin', {}, ''],
+    ['/user', 'users', {}, ''],
+    ['/user/456', 'user', { userId: '456' }, ''],
+    ['/user/admin', 'userAdmin', {}, ''],
+    ['/account', 'users', {}, ''],
+    ['/account/456', 'user', { userId: '456' }, ''],
+    ['/account/admin', 'userAdmin', {}, ''],
     ['/contact/email', 'contactByEmail', {}, ''],
     ['/contact/nonsense', 'contactNotFound', {}, ''],
     ['/nonsense', 'notFound', {}, ''],
@@ -232,9 +232,9 @@ describe('dispatching an action', () => {
     ['search', { query: 'devices' }, undefined, '/search?query=devices'],
     ['search', undefined, '#items', '/search#items'],
     ['item', { itemId: '123' }, undefined, '/item/123'],
-    ['users', undefined, undefined, '/users'],
-    ['user', { userId: '456' }, undefined, '/users/456'],
-    ['userAdmin', undefined, undefined, '/users/admin'],
+    ['users', undefined, undefined, '/user'],
+    ['user', { userId: '456' }, undefined, '/user/456'],
+    ['userAdmin', undefined, undefined, '/user/admin'],
     ['contactByEmail', undefined, undefined, '/contact/email'],
   ]
 
