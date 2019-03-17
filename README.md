@@ -42,10 +42,10 @@ const router = Router([
   Route('home', '/'),
   Scope('/user', Router([
     Route('user', '/:id'),
-    Route('friends', '/:id/friends'),
+    Route('friends', '/:id/friends')
   ])),
   Redirect('user', '/profile/:id'),
-  Fallback('notFound'),
+  Fallback('notFound')
 ])
 ```
 
