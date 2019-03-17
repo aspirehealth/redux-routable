@@ -44,9 +44,10 @@ export const goForward = () => ({
   type: GO_FORWARD,
 })
 
-export const routeChanged = (route, params, hash) => ({
+export const routeChanged = (route, params, hash, previous) => ({
   type: ROUTE_CHANGED,
   payload: { route, params, hash },
+  meta: { previous },
 })
 
 // Router Configuration
@@ -175,13 +176,15 @@ const isAbsoluteAction = ({ type }) => [PUSH, REPLACE, OPEN].includes(type)
 const isRelativeAction = ({ type }) => [GO, GO_BACK, GO_FORWARD].includes(type)
 
 export const createMiddleware = (router, history) => store => {
+  let previous
+
   const historyListener = location => {
     const { route, params, hash } = locationToRoute(router, location)
 
     if (route instanceof Redirect) {
       history.replace(routeToLocation(router, route.to, params, hash))
     } else {
-      store.dispatch(routeChanged(route.name, params, hash))
+      store.dispatch(routeChanged(route.name, params, hash, previous))
     }
   }
 
@@ -218,6 +221,10 @@ export const createMiddleware = (router, history) => store => {
           break
       }
     } else {
+      if (action.type === ROUTE_CHANGED) {
+        previous = action.payload
+      }
+
       return next(action)
     }
   }

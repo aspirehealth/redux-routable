@@ -86,7 +86,11 @@ Dispatching the `SYNC` action will cause a `ROUTE_CHANGED` action to be
 dispatched that corresponds to the current location:
 
 ```javascript
-{ type: ROUTE_CHANGED, payload: { route: 'home', params: {}, hash: '' } }
+{
+  type: ROUTE_CHANGED,
+  payload: { route: 'home', params: {}, hash: '' },
+  meta: { previous: undefined }
+}
 ```
 
 Since we're using `createMemoryHistory`, the location defaults to `/`, and the
@@ -113,7 +117,11 @@ This will do 2 things:
 2. A `ROUTE_CHANGED` action will be dispatched:
 
 ```javascript
-{ type: ROUTE_CHANGED, payload: { route: 'user', params: {}, hash: '' } }
+{
+  type: ROUTE_CHANGED,
+  payload: { route: 'user', params: {}, hash: '' },
+  meta: { previous: { route: 'home', params: {}, hash: '' } }
+}
 ```
 
 All the other navigation actions (with the exception of `OPEN`) will have the
@@ -124,8 +132,8 @@ same effect: dispatch a navigation action, the location will change, and a
 
 In order to use information from the location in your reducers or middleware,
 you need to listen to the `ROUTE_CHANGED` action. For example, what if we want a
-reducer that stores the ID of a user whenever we navigate to the `user` route,
-and clears it whenever we navigate away? Here's how we can do that:
+reducer that stores the ID of a user whenever we are in the `user` route, and
+clears it whenever we are out? Here's how we can do that:
 
 ```javascript
 import { ROUTE_CHANGED } from '@redux-routable/core'
@@ -157,6 +165,10 @@ views depending on what route you're currently in. It's also useful to kick off
 side effects like data fetching from an API whenever a route is navigated to
 (using middleware like [`redux-saga`](https://redux-saga.js.org/) or
 [`redux-observable`](https://redux-observable.js.org)).
+
+You can use `meta.previous` for logic that requires knowledge of "from" and
+"to", like navigation transitions or other side effects that only execute when
+navigating from a specific route to another.
 
 ## API
 
@@ -268,8 +280,11 @@ the middleware, so they will never reach your reducers or other middleware.
     type: ROUTE_CHANGED,
     payload: {
       route: ..., // Route name
-      params: { ... }, // Path and query params, string values
+      params: { ... }, // Path and query params (string values)
       hash: ... // Fragment identifier
+    },
+    meta: {
+      previous: ... // Payload of previous ROUTE_CHANGED action
     }
   }
   ```

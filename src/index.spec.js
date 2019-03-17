@@ -85,6 +85,15 @@ describe('middleware', () => {
     store.dispatch(action)
     expect(store.getActions()).toEqual([action])
   })
+
+  test('keeps track of previous ROUTE_CHANGED action', () => {
+    const { store } = mocks()
+    const action = routeChanged('cart', {}, '')
+
+    store.dispatch(replace('cart'))
+    store.dispatch(replace('home'))
+    expect(store.getActions()[1].meta.previous).toEqual(action.payload)
+  })
 })
 
 describe('helpers', () => {
