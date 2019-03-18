@@ -1,0 +1,17 @@
+{
+  "name": "redux-routable",
+  "version": "1.0.0",
+  "description": "Routing Middleware for Redux",
+  "main": "lib/index.js",
+  "author": "Jamin Thornsberry",
+  "license": "MIT",
+  "scripts": {
+    "build": "rimraf lib && babel src --root-mode upward --out-dir lib --ignore '**/*.spec.js'"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.3.4",
+    "history": "^4.9.0",
+    "path-to-regexp": "^3.0.0",
+    "query-string": "^6.4.0"
+  }
+}
