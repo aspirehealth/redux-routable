@@ -1,11 +1,8 @@
 {
-  "name": "redux-router",
+  "name": "redux-routable",
   "version": "1.0.0",
-  "description": "Routing for Redux",
+  "description": "Routing Middleware for Redux",
   "main": "lib/index.js",
-  "files": [
-    "lib"
-  ],
   "author": "Jamin Thornsberry",
   "license": "MIT",
   "scripts": {
