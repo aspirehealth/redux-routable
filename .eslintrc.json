@@ -2,7 +2,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended",
-    "plugin:jest/recommended"
+    "plugin:jest/recommended",
+    "plugin:react/recommended"
   ],
   "env": {
     "browser": true
