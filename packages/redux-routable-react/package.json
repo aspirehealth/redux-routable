@@ -8,6 +8,10 @@
   "scripts": {
     "build": "rimraf lib && babel src --root-mode upward --out-dir lib --ignore '**/*.spec.js'"
   },
+  "dependencies": {
+    "@babel/runtime": "^7.4.0",
+    "prop-types": "^15.7.2"
+  },
   "peerDependencies": {
     "react": "^16.8.4",
     "react-redux": "^6.0.1"
