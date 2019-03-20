@@ -120,7 +120,7 @@ export const paramsReducer = (route, defaultVal, paramsSelector) => (
 export const isRouteAction = route => ({ type, payload }) =>
   type === ROUTE_CHANGED && payload.route === route
 
-// Middleware
+// Utilities
 const getPathParamNames = path =>
   pathToRegexp
     .parse(path)
@@ -133,6 +133,7 @@ const keyFilter = (object, condition) =>
     return params
   }, {})
 
+// Route/Location Translation
 const routeToLocation = (router, name, params, hash) => {
   const route = router.routes.find(
     route => route instanceof Route && route.name === name,
@@ -171,6 +172,7 @@ const locationToRoute = (router, { pathname, search, hash }) => {
   return { route, params, hash }
 }
 
+// Middleware
 const isAbsoluteAction = ({ type }) => [PUSH, REPLACE, OPEN].includes(type)
 
 const isRelativeAction = ({ type }) => [GO, GO_BACK, GO_FORWARD].includes(type)
