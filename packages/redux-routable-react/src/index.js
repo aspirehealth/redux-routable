@@ -19,6 +19,9 @@ RouterProvider.propTypes = {
 // Link
 const linkActionCreators = { push, replace, open }
 
+const isModifiedEvent = event =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey
+
 export const Link = connect()(
   ({
     component: Component,
@@ -26,21 +29,36 @@ export const Link = connect()(
     route,
     params,
     hash,
+    onClick,
     dispatch,
     ...props
   }) => {
     const router = useContext(RouterContext)
     const location = routeToLocation(router, route, params, hash)
     const href = createPath(location)
+    const target = props.target || '_self'
 
-    const onClick = useCallback(() => {
-      const actionCreator = linkActionCreators[action]
-      const linkAction = actionCreator(route, params, hash)
+    const handleClick = useCallback(
+      event => {
+        if (onClick) onClick(event)
 
-      dispatch(linkAction)
-    }, [action, href])
+        if (
+          !event.defaultPrevented &&
+          event.button === 0 &&
+          target === '_self' &&
+          !isModifiedEvent(event)
+        ) {
+          const actionCreator = linkActionCreators[action]
+          const linkAction = actionCreator(route, params, hash)
 
-    return <Component {...props} href={href} onClick={onClick} />
+          event.preventDefault()
+          dispatch(linkAction)
+        }
+      },
+      [target, action, route, params, hash, onClick],
+    )
+
+    return <Component {...props} href={href} onClick={handleClick} />
   },
 )
 
@@ -50,6 +68,7 @@ Link.propTypes = {
   route: PropTypes.string.isRequired,
   params: PropTypes.objectOf(PropTypes.string),
   hash: PropTypes.string,
+  onClick: PropTypes.func,
 }
 
 Link.defaultProps = {

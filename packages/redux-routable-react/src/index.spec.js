@@ -11,6 +11,17 @@ const mockRouter = Router([
   Route('search', '/search/:category?'),
 ])
 
+const mockEvent = properties => ({
+  defaultPrevented: false,
+  button: 0,
+  metaKey: false,
+  altKey: false,
+  ctrlKey: false,
+  shiftKey: false,
+  preventDefault: () => {},
+  ...properties,
+})
+
 const mocks = ({ router = mockRouter } = {}) => {
   const history = createMemoryHistory()
   const middleware = createMiddleware(router, history)
@@ -62,24 +73,57 @@ describe('Link', () => {
     expect(link.props.extra).toBe('extra')
   })
 
-  test('dispatches ROUTE_CHANGED action when clicked', () => {
+  test('dispatches action when left-clicked', () => {
     const { store, create } = mocks()
-    const action = routeChanged('search', { category: 'widgets' }, '')
-    const link = create(
-      <Link route="search" params={{ category: 'widgets' }} />,
-    )
+    const action = routeChanged('home', {}, '')
+    const link = create(<Link route="home" />)
 
-    link.props.onClick()
+    link.props.onClick(mockEvent())
 
     expect(store.getActions()).toEqual([action])
   })
 
-  test('calls window.open() when clicked', () => {
+  test('calls window.open() when left-clicked', () => {
     const { create, window } = mocks()
     const link = create(<Link route="home" action="open" />)
 
-    link.props.onClick()
+    link.props.onClick(mockEvent())
 
     expect(window.open).toHaveBeenCalled()
+  })
+
+  test('prevents default when left-clicked', () => {
+    const { create } = mocks()
+    const preventDefault = jest.fn()
+    const link = create(<Link route="home" />)
+
+    link.props.onClick(mockEvent({ preventDefault }))
+
+    expect(preventDefault).toHaveBeenCalled()
+  })
+
+  test('does nothing when non-left-clicked', () => {
+    const { store, create } = mocks()
+    const link = create(<Link route="home" />)
+
+    link.props.onClick(mockEvent({ defaultPrevented: true }))
+    link.props.onClick(mockEvent({ button: 1 }))
+    link.props.onClick(mockEvent({ metaKey: true }))
+    link.props.onClick(mockEvent({ altKey: true }))
+    link.props.onClick(mockEvent({ ctrlKey: true }))
+    link.props.onClick(mockEvent({ shiftKey: true }))
+
+    expect(store.getActions()).toEqual([])
+  })
+
+  test('calls onClick when clicked', () => {
+    const { create } = mocks()
+    const onClick = jest.fn()
+    const event = mockEvent()
+    const link = create(<Link route="home" onClick={onClick} />)
+
+    link.props.onClick(event)
+
+    expect(onClick).toHaveBeenCalledWith(event)
   })
 })
