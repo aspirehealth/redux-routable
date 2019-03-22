@@ -134,7 +134,7 @@ const keyFilter = (object, condition) =>
   }, {})
 
 // Route/Location Translation
-const routeToLocation = (router, name, params, hash) => {
+export const routeToLocation = (router, name, params, hash) => {
   const route = router.routes.find(
     route => route instanceof Route && route.name === name,
   )
@@ -152,7 +152,7 @@ const routeToLocation = (router, name, params, hash) => {
   return { pathname, search, hash }
 }
 
-const locationToRoute = (router, { pathname, search, hash }) => {
+export const locationToRoute = (router, { pathname, search, hash }) => {
   const route = router.routes.find(route => route.pattern.test(pathname))
 
   if (route === undefined) {

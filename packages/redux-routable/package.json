@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.0",
-    "history": "^4.9.0",
     "path-to-regexp": "^3.0.0",
     "query-string": "^6.4.0"
+  },
+  "peerDependencies": {
+    "history": "^4.9.0"
   }
 }
