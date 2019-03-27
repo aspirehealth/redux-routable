@@ -1,18 +1,67 @@
 import { createPath } from 'history'
 import PropTypes from 'prop-types'
-import React, { createContext, useCallback, useContext } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { connect } from 'react-redux'
-import { Router, open, push, replace, routeToLocation } from 'redux-routable'
+import {
+  Router,
+  locationToRoute,
+  open,
+  push,
+  replace,
+  routeToLocation,
+} from 'redux-routable'
 
 const RouterContext = createContext()
+const CurrentRouteContext = createContext()
 
-// RouterProvider
-export const RouterProvider = ({ router, children }) => (
-  <RouterContext.Provider value={router}>{children}</RouterContext.Provider>
-)
+// Routable
+export const Routable = ({ router, history, children }) => {
+  const initialRoute = locationToRoute(router, history.location).route
+  const [currentRoute, setCurrentRoute] = useState(initialRoute)
 
-RouterProvider.propTypes = {
+  useEffect(
+    () =>
+      history.listen(location => {
+        setCurrentRoute(locationToRoute(router, location).route)
+      }),
+    [router, history],
+  )
+
+  return (
+    <RouterContext.Provider value={router}>
+      <CurrentRouteContext.Provider value={currentRoute}>
+        {children}
+      </CurrentRouteContext.Provider>
+    </RouterContext.Provider>
+  )
+}
+
+Routable.propTypes = {
   router: PropTypes.instanceOf(Router).isRequired,
+  history: PropTypes.object.isRequired,
+  children: PropTypes.node,
+}
+
+// Match
+export const Match = ({ route, children }) => {
+  const currentRoute = useContext(CurrentRouteContext)
+  const routes = route instanceof Array ? route : [route]
+  const match = routes.includes(currentRoute.name)
+
+  return match ? children : null
+}
+
+Match.propTypes = {
+  route: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]).isRequired,
   children: PropTypes.node,
 }
 
