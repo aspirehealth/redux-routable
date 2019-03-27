@@ -1,12 +1,17 @@
 {
+  "parser": "babel-eslint",
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended",
     "plugin:jest/recommended",
     "plugin:react/recommended"
   ],
-  "env": {
-    "browser": true
+  "globals": {
+    "window": true
   },
-  "parser": "babel-eslint"
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
 }
