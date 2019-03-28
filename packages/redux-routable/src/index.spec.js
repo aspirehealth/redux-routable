@@ -1,4 +1,4 @@
-import { createMemoryHistory, createPath } from 'history'
+import { createMemoryHistory } from 'history'
 import { applyMiddleware, createStore } from 'redux'
 import configureStore from 'redux-mock-store'
 import {
@@ -249,7 +249,7 @@ describe('dispatching an action', () => {
       const { store, history } = mocks()
 
       store.dispatch(replace(route, params, hash))
-      expect(createPath(history.location)).toBe(path)
+      expect(history.createHref(history.location)).toBe(path)
     })
   })
 })

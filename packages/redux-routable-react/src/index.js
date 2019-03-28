@@ -1,4 +1,3 @@
-import { createPath } from 'history'
 import PropTypes from 'prop-types'
 import React, {
   createContext,
@@ -17,6 +16,7 @@ import {
   routeToLocation,
 } from 'redux-routable'
 
+const HistoryContext = createContext()
 const RouterContext = createContext()
 const CurrentRouteContext = createContext()
 
@@ -34,11 +34,13 @@ export const Routable = ({ router, history, children }) => {
   )
 
   return (
-    <RouterContext.Provider value={router}>
-      <CurrentRouteContext.Provider value={currentRoute}>
-        {children}
-      </CurrentRouteContext.Provider>
-    </RouterContext.Provider>
+    <HistoryContext.Provider value={history}>
+      <RouterContext.Provider value={router}>
+        <CurrentRouteContext.Provider value={currentRoute}>
+          {children}
+        </CurrentRouteContext.Provider>
+      </RouterContext.Provider>
+    </HistoryContext.Provider>
   )
 }
 
@@ -82,9 +84,10 @@ export const Link = connect()(
     dispatch,
     ...props
   }) => {
+    const history = useContext(HistoryContext)
     const router = useContext(RouterContext)
     const location = routeToLocation(router, route, params, hash)
-    const href = createPath(location)
+    const href = history.createHref(location)
     const target = props.target || '_self'
 
     const handleClick = useCallback(
