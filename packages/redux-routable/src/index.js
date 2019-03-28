@@ -2,14 +2,14 @@ import pathToRegexp from 'path-to-regexp'
 import queryString from 'query-string'
 
 // Action Types
-const SYNC = '@@reduxRouter/SYNC'
-const PUSH = '@@reduxRouter/PUSH'
-const REPLACE = '@@reduxRouter/REPLACE'
-const OPEN = '@@reduxRouter/OPEN'
-const GO = '@@reduxRouter/GO'
-const GO_BACK = '@@reduxRouter/GO_BACK'
-const GO_FORWARD = '@@reduxRouter/GO_FORWARD'
-export const ROUTE_CHANGED = '@@reduxRouter/ROUTE_CHANGED'
+const SYNC = '@@reduxRoutable/SYNC'
+const PUSH = '@@reduxRoutable/PUSH'
+const REPLACE = '@@reduxRoutable/REPLACE'
+const OPEN = '@@reduxRoutable/OPEN'
+const GO = '@@reduxRoutable/GO'
+const GO_BACK = '@@reduxRoutable/GO_BACK'
+const GO_FORWARD = '@@reduxRoutable/GO_FORWARD'
+export const ROUTE_CHANGED = '@@reduxRoutable/ROUTE_CHANGED'
 
 // Action Creators
 export const sync = () => ({
