@@ -1,7 +1,7 @@
 import { createMemoryHistory } from 'history'
 import React from 'react'
 import { Provider } from 'react-redux'
-import { create } from 'react-test-renderer'
+import { act, create } from 'react-test-renderer'
 import configureStore from 'redux-mock-store'
 import { Route, Router, createMiddleware, routeChanged } from 'redux-routable'
 import { Link, Match, Routable } from './index'
@@ -26,63 +26,83 @@ const mocks = ({ historyOptions, router = mockRouter } = {}) => {
   const history = createMemoryHistory(historyOptions)
   const middleware = createMiddleware(router, history)
   const store = configureStore([middleware])()
-  const render = children =>
-    create(
-      <Provider store={store}>
-        <Routable router={router} history={history}>
-          {children}
-        </Routable>
-      </Provider>,
-    )
+  // eslint-disable-next-line react/prop-types
+  const Test = ({ children }) => (
+    <Provider store={store}>
+      <Routable router={router} history={history}>
+        {children}
+      </Routable>
+    </Provider>
+  )
+  const render = children => create(<Test>{children}</Test>).toJSON()
 
   window.open = jest.fn()
 
-  return { store, history, window, render }
+  return { store, history, window, render, Test }
 }
 
 describe('Match', () => {
   test('renders when matched on a single route', () => {
     const { render } = mocks()
-    const text = render(<Match route="home">matched</Match>).toJSON()
+    const match = render(<Match route="home">matched</Match>)
 
-    expect(text).toBe('matched')
+    expect(match).toBe('matched')
   })
 
   test('does not render when not matched on a single route', () => {
     const { render } = mocks()
-    const text = render(<Match route="search">matched</Match>).toJSON()
+    const match = render(<Match route="search">matched</Match>)
 
-    expect(text).toBe(null)
+    expect(match).toBe(null)
   })
 
   test('renders when matched on multiple routes', () => {
     const { render } = mocks()
-    const text = render(
-      <Match route={['home', 'search']}>matched</Match>,
-    ).toJSON()
+    const match = render(<Match route={['home', 'search']}>matched</Match>)
 
-    expect(text).toBe('matched')
+    expect(match).toBe('matched')
   })
 
   test('does not render when not matched on multiple routes', () => {
     const { render } = mocks()
-    const text = render(<Match route={[]}>matched</Match>).toJSON()
+    const match = render(<Match route={[]}>matched</Match>)
 
-    expect(text).toBe(null)
+    expect(match).toBe(null)
+  })
+
+  test('renders correct content when location is changed', () => {
+    let renderer
+    const { history, Test } = mocks()
+    const element = (
+      <Test>
+        <Match route="home">home</Match>
+        <Match route="search">search</Match>
+      </Test>
+    )
+
+    act(() => {
+      renderer = create(element)
+    })
+
+    expect(renderer.toJSON()).toBe('home')
+    act(() => history.replace('/search/widgets'))
+    expect(renderer.toJSON()).toBe('search')
+    act(() => history.replace('/'))
+    expect(renderer.toJSON()).toBe('home')
   })
 })
 
 describe('Link', () => {
   test('renders <a> element by default', () => {
     const { render } = mocks()
-    const link = render(<Link route="home" />).toJSON()
+    const link = render(<Link route="home" />)
 
     expect(link.type).toBe('a')
   })
 
   test('renders custom component', () => {
     const { render } = mocks()
-    const link = render(<Link component="div" route="home" />).toJSON()
+    const link = render(<Link component="div" route="home" />)
 
     expect(link.type).toBe('div')
   })
@@ -95,14 +115,14 @@ describe('Link', () => {
         params={{ category: 'widgets', query: 'devices' }}
         hash="#items"
       />,
-    ).toJSON()
+    )
 
     expect(link.props.href).toBe('/search/widgets?query=devices#items')
   })
 
   test('allows other props to pass through', () => {
     const { render } = mocks()
-    const link = render(<Link route="home" extra="extra" />).toJSON()
+    const link = render(<Link route="home" extra="extra" />)
 
     expect(link.props.extra).toBe('extra')
   })
@@ -110,7 +130,7 @@ describe('Link', () => {
   test('dispatches action when left-clicked', () => {
     const { store, render } = mocks()
     const action = routeChanged('home', {}, '')
-    const link = render(<Link route="home" />).toJSON()
+    const link = render(<Link route="home" />)
 
     link.props.onClick(mockEvent())
 
@@ -119,7 +139,7 @@ describe('Link', () => {
 
   test('calls window.open() when left-clicked', () => {
     const { render, window } = mocks()
-    const link = render(<Link route="home" action="open" />).toJSON()
+    const link = render(<Link route="home" action="open" />)
 
     link.props.onClick(mockEvent())
 
@@ -129,7 +149,7 @@ describe('Link', () => {
   test('prevents default when left-clicked', () => {
     const { render } = mocks()
     const preventDefault = jest.fn()
-    const link = render(<Link route="home" />).toJSON()
+    const link = render(<Link route="home" />)
 
     link.props.onClick(mockEvent({ preventDefault }))
 
@@ -138,7 +158,7 @@ describe('Link', () => {
 
   test('does nothing when non-left-clicked', () => {
     const { store, render } = mocks()
-    const link = render(<Link route="home" />).toJSON()
+    const link = render(<Link route="home" />)
 
     link.props.onClick(mockEvent({ defaultPrevented: true }))
     link.props.onClick(mockEvent({ button: 1 }))
@@ -154,7 +174,7 @@ describe('Link', () => {
     const { render } = mocks()
     const onClick = jest.fn()
     const event = mockEvent()
-    const link = render(<Link route="home" onClick={onClick} />).toJSON()
+    const link = render(<Link route="home" onClick={onClick} />)
 
     link.props.onClick(event)
 
