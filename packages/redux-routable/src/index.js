@@ -102,23 +102,28 @@ export function Router(routes) {
 }
 
 // Helpers
-export const paramsReducer = (route, defaultVal, paramsSelector) => (
-  state = defaultVal,
-  { type, payload },
-) => {
-  if (type === ROUTE_CHANGED) {
-    if (payload.route === route) {
-      return paramsSelector(payload.params)
+export const paramsReducer = (route, defaultVal, paramsSelector) => {
+  const routes = route instanceof Array ? route : [route]
+
+  return (state = defaultVal, { type, payload }) => {
+    if (type === ROUTE_CHANGED) {
+      if (routes.includes(payload.route)) {
+        return paramsSelector(payload.params)
+      } else {
+        return defaultVal
+      }
     } else {
-      return defaultVal
+      return state
     }
-  } else {
-    return state
   }
 }
 
-export const isRouteAction = route => ({ type, payload }) =>
-  type === ROUTE_CHANGED && payload.route === route
+export const isRouteAction = route => {
+  const routes = route instanceof Array ? route : [route]
+
+  return ({ type, payload }) =>
+    type === ROUTE_CHANGED && routes.includes(payload.route)
+}
 
 // Utilities
 const getPathParamNames = path =>

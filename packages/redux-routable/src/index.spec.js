@@ -97,7 +97,7 @@ describe('middleware', () => {
 })
 
 describe('helpers', () => {
-  test('paramsReducer() creates a route-specific reducer for params', () => {
+  test('paramsReducer() creates a route-specific reducer for params for a single route', () => {
     const reducer = paramsReducer('item', null, ({ itemId }) => itemId)
     const history = createMemoryHistory()
     const middleware = createMiddleware(mockRouter, history)
@@ -110,11 +110,38 @@ describe('helpers', () => {
     expect(store.getState()).toBe(null)
   })
 
-  test('isRouteAction() creates a route-specific action predicate', () => {
+  test('paramsReducer() creates a route-specific reducer for params for multiple routes', () => {
+    const reducer = paramsReducer(
+      ['item', 'user'],
+      null,
+      ({ userId, itemId }) => userId || itemId,
+    )
+    const history = createMemoryHistory()
+    const middleware = createMiddleware(mockRouter, history)
+    const store = createStore(reducer, applyMiddleware(middleware))
+
+    expect(store.getState()).toBe(null)
+    store.dispatch(replace('item', { itemId: '123' }))
+    expect(store.getState()).toBe('123')
+    store.dispatch(replace('user', { userId: '456' }))
+    expect(store.getState()).toBe('456')
+    store.dispatch(replace('home'))
+    expect(store.getState()).toBe(null)
+  })
+
+  test('isRouteAction() creates a route-specific action predicate for a single route', () => {
     const isCartAction = isRouteAction('cart')
 
     expect(isCartAction(routeChanged('home'))).toBe(false)
     expect(isCartAction(routeChanged('cart'))).toBe(true)
+  })
+
+  test('isRouteAction() creates a route-specific action predicate for multiple routes', () => {
+    const isCartOrSearchAction = isRouteAction(['cart', 'search'])
+
+    expect(isCartOrSearchAction(routeChanged('home'))).toBe(false)
+    expect(isCartOrSearchAction(routeChanged('cart'))).toBe(true)
+    expect(isCartOrSearchAction(routeChanged('search'))).toBe(true)
   })
 })
 

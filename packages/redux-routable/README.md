@@ -301,12 +301,15 @@ the middleware, so they will never reach your reducers or other middleware.
 - `paramsReducer(route, defaultVal, paramsSelector)`
 
   This function creates a reducer that evaluates `paramsSelector` against the
-  `payload.params` of a `ROUTE_CHANGED` action for the specified `route`. Before
-  the specified `route` is navigated to and when it is navigated away from, the
-  reducer will evaluate to `defaultVal`.
+  `payload.params` of a `ROUTE_CHANGED` action for the specified `route` name.
+  Before the specified `route` is navigated to and when it is navigated away
+  from, the reducer will evaluate to `defaultVal`.
 
 - `isRouteAction(route)`
 
   This function takes a `route` name and returns a predicate that evaluates to
   `true` when passed a `ROUTE_CHANGED` action that matches the `route` and
   evaluates to `false` otherwise.
+
+The `route` parameter of `paramsReducer` and `isRouteAction` can be either a
+single route name or an array of route names.
