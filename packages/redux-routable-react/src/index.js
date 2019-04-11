@@ -20,18 +20,19 @@ const HistoryContext = createContext()
 const RouterContext = createContext()
 const CurrentRouteContext = createContext()
 
-// Routable
+// Routable Component
 export const Routable = ({ router, history, children }) => {
-  const initialRoute = locationToRoute(router, history.location).route
-  const [currentRoute, setCurrentRoute] = useState(initialRoute)
+  const [currentRoute, setCurrentRoute] = useState(() => {
+    const { route } = locationToRoute(router, history.location)
+    return route
+  })
 
-  useEffect(
-    () =>
-      history.listen(location => {
-        setCurrentRoute(locationToRoute(router, location).route)
-      }),
-    [router, history],
-  )
+  useEffect(() => {
+    return history.listen(location => {
+      const { route } = locationToRoute(router, location)
+      setCurrentRoute(route)
+    })
+  }, [router, history])
 
   return (
     <HistoryContext.Provider value={history}>
@@ -50,7 +51,7 @@ Routable.propTypes = {
   children: PropTypes.node,
 }
 
-// Match
+// Match Component
 export const Match = ({ route, children }) => {
   const currentRoute = useContext(CurrentRouteContext)
   const routes = route instanceof Array ? route : [route]
@@ -67,7 +68,7 @@ Match.propTypes = {
   children: PropTypes.node,
 }
 
-// Link
+// Link Component
 const linkActionCreators = { push, replace, open }
 
 const isModifiedEvent = event =>
@@ -107,7 +108,7 @@ export const Link = connect()(
           dispatch(linkAction)
         }
       },
-      [target, action, route, params, hash, onClick],
+      [onClick, target, action, route, params, hash, dispatch],
     )
 
     return <Component {...props} href={href} onClick={handleClick} />
