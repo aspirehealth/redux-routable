@@ -15,7 +15,7 @@ and actions will be dispatched whenever the route changes.
 ## Installation
 
 ```shell
-npm install --save @redux-routable/core
+npm install --save redux-routable
 ```
 
 Along with installing this package, you'll also need to have
@@ -36,7 +36,7 @@ README to decide how you'd like to create the `history` object (using
 Let's start by defining a router:
 
 ```javascript
-import { Router, Route, Redirect, Fallback, Scope } from '@redux-routable/core'
+import { Router, Route, Redirect, Fallback, Scope } from 'redux-routable'
 
 const router = Router([
   Route('home', '/'),
@@ -63,7 +63,7 @@ Now let's create our middleware and create a Redux store with it:
 ```javascript
 import { applyMiddleware, createStore } from 'redux'
 import { createMemoryHistory } from 'history'
-import { createMiddleware } from '@redux-routable/core'
+import { createMiddleware } from 'redux-routable'
 import reducer from './reducer'
 
 const history = createMemoryHistory()
@@ -77,7 +77,7 @@ Now that we have our Redux store, we can dispatch some actions. The first action
 we'll want to dispatch is the `SYNC` action provided by Redux Routable:
 
 ```javascript
-import { sync } from '@redux-routable/core'
+import { sync } from 'redux-routable'
 
 store.dispatch(sync())
 ```
@@ -106,7 +106,7 @@ of the navigation actions (`PUSH`, `REPLACE`, `OPEN`, `GO`, `GO_BACK`,
 `GO_FORWARD`). We'll use the `PUSH` action as an example:
 
 ```javascript
-import { push } from '@redux-routable/core'
+import { push } from 'redux-routable'
 
 store.dispatch(push('/user/123'))
 ```
@@ -136,7 +136,7 @@ reducer that stores the ID of a user whenever we are in the `user` route, and
 clears it whenever we are out? Here's how we can do that:
 
 ```javascript
-import { ROUTE_CHANGED } from '@redux-routable/core'
+import { ROUTE_CHANGED } from 'redux-routable'
 
 const reducer = (state, { type, payload }) => {
   if (type === ROUTE_CHANGED) {
@@ -154,7 +154,7 @@ const reducer = (state, { type, payload }) => {
 This use case is common enough that Redux Routable provides a helper for it:
 
 ```javascript
-import { paramsReducer } from '@redux-routable/core'
+import { paramsReducer } from 'redux-routable'
 
 const reducer = paramsReducer('user', null, ({ id }) => id)
 ```
@@ -173,7 +173,7 @@ navigating from a specific route to another.
 ## API
 
 All functions in this section are exported as named exports from the
-`@redux-routable/core` module.
+`redux-routable` module.
 
 ### Router Configuration Constructors
 
