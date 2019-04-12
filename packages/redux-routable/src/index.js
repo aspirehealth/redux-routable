@@ -118,14 +118,14 @@ export const paramsReducer = (route, defaultVal, paramsSelector) => {
   }
 }
 
-export const isRouteAction = route => {
+export const changedTo = route => {
   const routes = route instanceof Array ? route : [route]
 
   return ({ type, payload }) =>
     type === ROUTE_CHANGED && routes.includes(payload.route)
 }
 
-export const routeEntered = route => {
+export const entered = route => {
   const routes = route instanceof Array ? route : [route]
 
   return ({ type, payload, meta }) =>
@@ -134,7 +134,7 @@ export const routeEntered = route => {
     (meta.previous === undefined || !routes.includes(meta.previous.route))
 }
 
-export const routeExited = route => {
+export const exited = route => {
   const routes = route instanceof Array ? route : [route]
 
   return ({ type, payload, meta }) =>

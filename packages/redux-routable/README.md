@@ -163,19 +163,19 @@ const reducer = paramsReducer('user', null, ({ id }) => id)
 You can handle `ROUTE_CHANGED` actions however you'd like. You'll likely want to
 have a reducer that stores the current route, so that you can render different
 views depending on what route you're currently navigated to. You'll also
-probably want to store parameters from the location (see the `paramsReducer`
-function in the ["Helpers"](#helpers) section).
+probably want to store parameters from the location (see `paramsReducer` in the
+["Helpers"](#helpers) section).
 
-You can use `meta.previous` for logic that requires knowledge of "from" and
-"to", like navigation transitions or other side effects that only execute when
-navigating from one route to another (see the `routeEntered` and `routeExited`
-functions in the ["Helpers"](#helpers) section).
+You can use `meta.previous` for logic that requires knowledge of "exits" and
+"enters", like navigation transitions or other side effects that only execute
+when navigating from one route to another (see `entered` and `exited` in the
+["Helpers"](#helpers) section).
 
 It's also useful to kick off side effects like data fetching from an API
 whenever a route is navigated to using middleware like
 [`redux-saga`](https://redux-saga.js.org/) or
-[`redux-observable`](https://redux-observable.js.org) (see the `isRouteAction`
-function in the ["Helpers"](#helpers) section).
+[`redux-observable`](https://redux-observable.js.org) (see `changedTo` in the
+["Helpers"](#helpers) section).
 
 ## API
 
@@ -308,27 +308,29 @@ the middleware, so they will never reach your reducers or other middleware.
 - `paramsReducer(route, defaultVal, paramsSelector)`
 
   This function creates a reducer that evaluates `paramsSelector` against the
-  `payload.params` of a `ROUTE_CHANGED` action for the specified `route` name.
-  Before the specified `route` is navigated to and when it is navigated away
-  from, the reducer will evaluate to `defaultVal`.
+  `payload.params` of a `ROUTE_CHANGED` action when navigated to the specified
+  `route`. When navigated away from `route`, the reducer will evaluate to
+  `defaultVal`.
 
-- `isRouteAction(route)`
+- `changedTo(route)`
 
-  This function takes a `route` name and returns a predicate that evaluates to
+  This function takes a route name and returns a predicate that evaluates to
   `true` when passed a `ROUTE_CHANGED` action that matches the `route` and
   evaluates to `false` otherwise.
 
-- `routeEntered(route)`
+- `entered(route)`
 
-  This function takes a `route` name and returns a predicate that evaluates to
-  `true` when passed a `ROUTE_CHANGED` action that indicates that the `route`
-  was navigated to (entered) and evaluates to `false` otherwise.
+  This function takes a route name and returns a predicate that evaluates to
+  `true` when passed a `ROUTE_CHANGED` action where `route` was "entered" (the
+  previous `ROUTE_CHANGED` action does not match `route`, but the current one
+  does) and evaluates to `false` otherwise.
 
-- `routeExited(route)`
+- `exited(route)`
 
-  This function takes a `route` name and returns a predicate that evaluates to
-  `true` when passed a `ROUTE_CHANGED` action that indicates that the `route`
-  was navigated away from (exited) and evaluates to `false` otherwise.
+  This function takes a route name and returns a predicate that evaluates to
+  `true` when passed a `ROUTE_CHANGED` action where `route` was "exited" (the
+  previous `ROUTE_CHANGED` action matches `route`, but the current one does not)
+  and evaluates to `false` otherwise.
 
 The `route` parameter of all of the helper functions can be either a single
 route name or an array of route names.
