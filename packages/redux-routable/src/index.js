@@ -125,6 +125,24 @@ export const isRouteAction = route => {
     type === ROUTE_CHANGED && routes.includes(payload.route)
 }
 
+export const routeEntered = route => {
+  const routes = route instanceof Array ? route : [route]
+
+  return ({ type, payload, meta }) =>
+    type === ROUTE_CHANGED &&
+    routes.includes(payload.route) &&
+    (meta.previous === undefined || !routes.includes(meta.previous.route))
+}
+
+export const routeExited = route => {
+  const routes = route instanceof Array ? route : [route]
+
+  return ({ type, payload, meta }) =>
+    type === ROUTE_CHANGED &&
+    !routes.includes(payload.route) &&
+    (meta.previous !== undefined && routes.includes(meta.previous.route))
+}
+
 // Utilities
 const getPathParamNames = path =>
   pathToRegexp

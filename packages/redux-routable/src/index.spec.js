@@ -17,6 +17,8 @@ import {
   push,
   replace,
   routeChanged,
+  routeEntered,
+  routeExited,
   sync,
 } from './index'
 
@@ -97,7 +99,7 @@ describe('middleware', () => {
 })
 
 describe('helpers', () => {
-  test('paramsReducer() creates a route-specific reducer for params for a single route', () => {
+  test('paramsReducer() creates a reducer for params for a single route', () => {
     const reducer = paramsReducer('item', null, ({ itemId }) => itemId)
     const history = createMemoryHistory()
     const middleware = createMiddleware(mockRouter, history)
@@ -110,7 +112,7 @@ describe('helpers', () => {
     expect(store.getState()).toBe(null)
   })
 
-  test('paramsReducer() creates a route-specific reducer for params for multiple routes', () => {
+  test('paramsReducer() creates a reducer for params for multiple routes', () => {
     const reducer = paramsReducer(
       ['item', 'user'],
       null,
@@ -129,19 +131,72 @@ describe('helpers', () => {
     expect(store.getState()).toBe(null)
   })
 
-  test('isRouteAction() creates a route-specific action predicate for a single route', () => {
+  test('isRouteAction() creates an action predicate for a single route', () => {
     const isCartAction = isRouteAction('cart')
 
     expect(isCartAction(routeChanged('home'))).toBe(false)
     expect(isCartAction(routeChanged('cart'))).toBe(true)
   })
 
-  test('isRouteAction() creates a route-specific action predicate for multiple routes', () => {
+  test('isRouteAction() creates an action predicate for multiple routes', () => {
     const isCartOrSearchAction = isRouteAction(['cart', 'search'])
 
     expect(isCartOrSearchAction(routeChanged('home'))).toBe(false)
     expect(isCartOrSearchAction(routeChanged('cart'))).toBe(true)
     expect(isCartOrSearchAction(routeChanged('search'))).toBe(true)
+  })
+
+  test('routeEntered() creates an action predicate for a single route', () => {
+    const { store } = mocks()
+    const homeEntered = routeEntered('home')
+    const cartEntered = routeEntered('cart')
+
+    store.dispatch(replace('home'))
+    store.dispatch(replace('cart'))
+    expect(store.getActions().map(homeEntered)).toEqual([true, false])
+    expect(store.getActions().map(cartEntered)).toEqual([false, true])
+  })
+
+  test('routeEntered() creates an action predicate for multiple routes', () => {
+    const { store } = mocks()
+    const homeOrCartEntered = routeEntered(['home', 'cart'])
+
+    store.dispatch(replace('home'))
+    store.dispatch(replace('item', { itemId: '123' }))
+    store.dispatch(replace('cart'))
+    expect(store.getActions().map(homeOrCartEntered)).toEqual([
+      true,
+      false,
+      true,
+    ])
+  })
+
+  test('routeExited() creates an action predicate for a single route', () => {
+    const { store } = mocks()
+    const homeExited = routeExited('home')
+    const cartExited = routeExited('cart')
+
+    store.dispatch(replace('home'))
+    store.dispatch(replace('cart'))
+    store.dispatch(replace('item', { itemId: '123' }))
+    expect(store.getActions().map(homeExited)).toEqual([false, true, false])
+    expect(store.getActions().map(cartExited)).toEqual([false, false, true])
+  })
+
+  test('routeExited() creates an action predicate for multiple routes', () => {
+    const { store } = mocks()
+    const homeOrCartExited = routeExited(['home', 'cart'])
+
+    store.dispatch(replace('home'))
+    store.dispatch(replace('item', { itemId: '123' }))
+    store.dispatch(replace('cart'))
+    store.dispatch(replace('item', { itemId: '123' }))
+    expect(store.getActions().map(homeOrCartExited)).toEqual([
+      false,
+      true,
+      false,
+      true,
+    ])
   })
 })
 
