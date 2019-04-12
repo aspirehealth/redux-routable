@@ -1,7 +1,7 @@
 {
   "name": "redux-routable-react",
   "version": "1.0.0",
-  "description": "React Components for redux-routable",
+  "description": "React Components for Redux Routable",
   "main": "lib/index.js",
   "author": "Jamin Thornsberry",
   "license": "MIT",
