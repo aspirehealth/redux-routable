@@ -1,7 +1,8 @@
 # Redux Routable React
 
-React components that integrate with [Redux
-Routable](https://www.npmjs.com/package/redux-routable).
+[React](https://reactjs.org/) components that integrate with [Redux
+Routable](https://www.npmjs.com/package/redux-routable). Render content based on
+the current route, and declaratively link to different routes.
 
 ## Overview
 
@@ -17,15 +18,14 @@ npm install --save redux-routable-react
 ```
 
 The `redux-routable-react` package is meant to be installed along with the
-[`redux-routable`](https://www.npmjs.com/package/redux-routable) package. See
-the installation instructions for `redux-routable`
-[here](https://www.npmjs.com/package/redux-routable#installation).
+[`redux-routable`](https://www.npmjs.com/package/redux-routable#installation)
+package.
 
 ## Usage
 
 Redux Routable React is a companion library for integrating React and Redux
 Routable. This means that before using Redux Routable React, you need create a
-`history` instance and a `router`. See how to do that in Redux Routable's
+`router` and a `history` object. See how to do that in Redux Routable's
 ["Usage"](https://www.npmjs.com/package/redux-routable#usage) section. For
 brevity, let's just define a router and leave out the rest of the setup:
 
@@ -92,9 +92,9 @@ const App = () => (
 )
 ```
 
-In this example, if the location was `/`, you would still see `I'm on the home
-page!`, but if the location was `/cart` or `/search/widgets`, you would see `I'm
-on another page!`.
+Now, if the location was `/`, you would still see `I'm on the home page!`, but
+if the location was `/cart` or `/search/widgets`, you would see `I'm on another
+page!`.
 
 ### Using the `<Link>` Component
 
@@ -130,5 +130,51 @@ clicked with a normal left-click (no modifier keys held down), instead of
 navigating to a new page using standard browser behavior, a Redux Routable
 navigation action will be dispatched (`PUSH` by default, configurable through
 the `action` prop). This means that either the location will change without a
-page load (for `PUSH` and `REPLACE`) or a new tab will be opened (for `OPEN`),
-and your reducers and middleware will receive the `ROUTE_CHANGED` action.
+page load (when `action="push"` or `action="replace"`) or a new tab will be
+opened (when `action="open"`), and your reducers and middleware will receive the
+`ROUTE_CHANGED` action.
+
+## API
+
+All components in this section are exported as named exports from the
+`redux-routable-react` module.
+
+### `<Routable>`
+
+Component used to provide `router` and `history` to the rest of the application.
+
+#### Props
+
+| Name         | Type     | Description                                                                                               |
+| ------------ | -------- | --------------------------------------------------------------------------------------------------------- |
+| `router *`   | `object` | The router for your application created using the `Router` constructor from the `redux-routable` package. |
+| `history *`  | `object` | The object returned using one of the `create` functions from the `history` package.                       |
+| `children *` | `node`   | The children to be rendered.                                                                              |
+
+### `<Match>`
+
+Component used to conditionally render content depending on the current route.
+
+#### Props
+
+| Name         | Type                | Description                                                          |
+| ------------ | ------------------- | -------------------------------------------------------------------- |
+| `route *`    | `string | string[]` | A route name or names to match against the current location.         |
+| `children *` | `node`              | The children to be rendered if `route` matches the current location. |
+
+### `<Link>`
+
+Component used to render links that can be used to navigate around the
+application.
+
+#### Props
+
+| Name        | Type                          | Default  | Description                                                                   |
+| ----------- | ----------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `route *`   | `any`                         |          | The name of a route to navigate to.                                           |
+| `params`    | `object{string}`              | `{}`     | The params of the route to navigate to.                                       |
+| `hash`      | `string`                      | `""`     | The hash of the route to navigate to.                                         |
+| `action`    | `"push" | "replace" | "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |
+| `component` | `string | func`               | `"a"`    | The React component to render for the `Link`.                                 |
+
+Any other props will be passed to the root element defined by `component`.

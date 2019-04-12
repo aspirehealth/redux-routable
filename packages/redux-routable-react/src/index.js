@@ -48,7 +48,7 @@ export const Routable = ({ router, history, children }) => {
 Routable.propTypes = {
   router: PropTypes.instanceOf(Router).isRequired,
   history: PropTypes.object.isRequired,
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 }
 
 // Match Component
@@ -65,7 +65,7 @@ Match.propTypes = {
     PropTypes.string,
     PropTypes.arrayOf(PropTypes.string),
   ]).isRequired,
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 }
 
 // Link Component
