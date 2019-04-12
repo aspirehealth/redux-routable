@@ -6,11 +6,12 @@ and actions will be dispatched whenever the route changes.
 
 ## Overview
 
-- Use declarative functions to define your router.
+- Use [declarative functions](#router-configuration-constructors) to define your
+  router.
 - Dispatch [navigation actions](#navigation-action-creators) to change the
   location, open a route in a new tab, or go back or forward in history.
-- Listen for the `ROUTE_CHANGED` action in your reducers to persist and execute
-  side effects for the route and parameters.
+- Listen for the [`ROUTE_CHANGED`](#action-types) action in your reducers to
+  persist and execute side effects for the route and parameters.
 
 ## Installation
 

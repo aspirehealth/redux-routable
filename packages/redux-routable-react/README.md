@@ -6,10 +6,10 @@ the current route, and declaratively link to different routes.
 
 ## Overview
 
-- Conditionally render content depending on the current route with the `<Match>`
-  component.
-- Navigate to locations within your application declaratively with the `<Link>`
-  component.
+- Conditionally render content depending on the current route with the
+  [`<Match>`](#match) component.
+- Navigate to locations within your application declaratively with the
+  [`<Link>`](#link) component.
 
 ## Installation
 
