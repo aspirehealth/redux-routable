@@ -171,7 +171,7 @@ application.
 
 | Name        | Type                          | Default  | Description                                                                   |
 | ----------- | ----------------------------- | -------- | ----------------------------------------------------------------------------- |
-| `route *`   | `any`                         |          | The name of a route to navigate to.                                           |
+| `route *`   | `any`                         |          | The name of the route to navigate to.                                         |
 | `params`    | `object{string}`              | `{}`     | The params of the route to navigate to.                                       |
 | `hash`      | `string`                      | `""`     | The hash of the route to navigate to.                                         |
 | `action`    | `"push" | "replace" | "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |

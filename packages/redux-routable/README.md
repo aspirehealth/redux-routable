@@ -132,9 +132,24 @@ same effect: dispatch a navigation action, the location will change, and a
 ### Handling `ROUTE_CHANGED` Actions
 
 In order to use information from the location in your reducers or middleware,
-you need to listen to the `ROUTE_CHANGED` action. For example, what if we want a
-reducer that stores the ID of a user whenever we are in the `user` route, and
-clears it whenever we are out? Here's how we can do that:
+you need to listen to the `ROUTE_CHANGED` action. If we want to keep track of
+the current route, we can do so easily:
+
+```javascript
+import { ROUTE_CHANGED } from 'redux-routable'
+
+const reducer = (state, { type, payload }) => {
+  if (type === ROUTE_CHANGED) {
+    return payload.route
+  } else {
+    return state
+  }
+}
+```
+
+What if we want a reducer that stores the ID of a user whenever we are navigated
+to the `user` route, and clears it whenever we are navigated away? Here's how we
+can do that:
 
 ```javascript
 import { ROUTE_CHANGED } from 'redux-routable'
@@ -152,7 +167,8 @@ const reducer = (state, { type, payload }) => {
 }
 ```
 
-This use case is common enough that Redux Routable provides a helper for it:
+This use case is common enough, and reducers like this will likely be written
+repeatedly, so Redux Routable provides a helper for it:
 
 ```javascript
 import { paramsReducer } from 'redux-routable'
@@ -160,22 +176,17 @@ import { paramsReducer } from 'redux-routable'
 const reducer = paramsReducer('user', null, ({ id }) => id)
 ```
 
-You can handle `ROUTE_CHANGED` actions however you'd like. You'll likely want to
-have a reducer that stores the current route, so that you can render different
-views depending on what route you're currently navigated to. You'll also
-probably want to store parameters from the location (see `paramsReducer` in the
-["Helpers"](#helpers) section).
+Redux Routable comes with some other helpers as well. The `changedTo` function
+determines if an action is a `ROUTE_CHANGED` action for a specific `route`. This
+can be useful to kick off side effects like loading data from an API whenever a
+specific route or routes are navigated to. There are also the `entered` and
+`exited` functions, which look at `meta.previous` to determine whether you're
+going "from" or "to" a specific route or routes. These can be useful for page
+transitions or loading/clearing data common to a set of routes.
 
-You can use `meta.previous` for logic that requires knowledge of "exits" and
-"enters", like navigation transitions or other side effects that only execute
-when navigating from one route to another (see `entered` and `exited` in the
-["Helpers"](#helpers) section).
-
-It's also useful to kick off side effects like data fetching from an API
-whenever a route is navigated to using middleware like
-[`redux-saga`](https://redux-saga.js.org/) or
-[`redux-observable`](https://redux-observable.js.org) (see `changedTo` in the
-["Helpers"](#helpers) section).
+Even though these helper functions cover some common use cases, you can handle
+`ROUTE_CHANGED` actions however you'd like. Redux Routable does not prescribe
+how you store your routing data or how you manage side effects.
 
 ## API
 
