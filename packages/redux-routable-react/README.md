@@ -157,10 +157,10 @@ Component used to conditionally render content depending on the current route.
 
 #### Props
 
-| Name         | Type                | Description                                                          |
-| ------------ | ------------------- | -------------------------------------------------------------------- |
-| `route *`    | `string | string[]` | A route name or names to match against the current location.         |
-| `children *` | `node`              | The children to be rendered if `route` matches the current location. |
+| Name         | Type                 | Description                                                          |
+| ------------ | -------------------- | -------------------------------------------------------------------- |
+| `route *`    | `string \| string[]` | A route name or names to match against the current location.         |
+| `children *` | `node`               | The children to be rendered if `route` matches the current location. |
 
 ### `<Link>`
 
@@ -169,12 +169,12 @@ application.
 
 #### Props
 
-| Name        | Type                          | Default  | Description                                                                   |
-| ----------- | ----------------------------- | -------- | ----------------------------------------------------------------------------- |
-| `route *`   | `any`                         |          | The name of the route to navigate to.                                         |
-| `params`    | `object{string}`              | `{}`     | The params of the route to navigate to.                                       |
-| `hash`      | `string`                      | `""`     | The hash of the route to navigate to.                                         |
-| `action`    | `"push" | "replace" | "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |
-| `component` | `string | func`               | `"a"`    | The React component to render for the `Link`.                                 |
+| Name        | Type                            | Default  | Description                                                                   |
+| ----------- | ------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `route *`   | `any`                           |          | The name of the route to navigate to.                                         |
+| `params`    | `object{string}`                | `{}`     | The params of the route to navigate to.                                       |
+| `hash`      | `string`                        | `""`     | The hash of the route to navigate to.                                         |
+| `action`    | `"push" \| "replace" \| "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |
+| `component` | `string \| func`                | `"a"`    | The React component to render for the `Link`.                                 |
 
 Any other props will be passed to the root element defined by `component`.
