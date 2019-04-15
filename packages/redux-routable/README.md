@@ -120,7 +120,7 @@ This will do 2 things:
 ```javascript
 {
   type: ROUTE_CHANGED,
-  payload: { route: 'user', params: {}, hash: '' },
+  payload: { route: 'user', params: { id: '123' }, hash: '' },
   meta: { previous: { route: 'home', params: {}, hash: '' } }
 }
 ```
