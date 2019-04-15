@@ -71,14 +71,14 @@ specific route:
 ```javascript
 const App = () => (
   <React.Fragment>
-    <Match route="home">I'm on the home page!</Match>
-    <Match route="cart">I'm on the cart page!</Match>
+    <Match route="home">I am on the home page!</Match>
+    <Match route="cart">I am on the cart page!</Match>
   </React.Fragment>
 )
 ```
 
-So, if the location was `/`, you would see `I'm on the home page!`, and if the
-location was `/cart`, you would see `I'm on the cart page!`.
+So, if the location was `/`, you would see `I am on the home page!`, and if the
+location was `/cart`, you would see `I am on the cart page!`.
 
 You can also pass an array of route names to the `route` prop to match on
 multiple routes:
@@ -86,14 +86,14 @@ multiple routes:
 ```javascript
 const App = () => (
   <React.Fragment>
-    <Match route="home">I'm on the home page!</Match>
-    <Match route={['cart', 'search']}>I'm on another page!</Match>
+    <Match route="home">I am on the home page!</Match>
+    <Match route={['cart', 'search']}>I am on another page!</Match>
   </React.Fragment>
 )
 ```
 
-Now, if the location was `/`, you would still see `I'm on the home page!`, but
-if the location was `/cart` or `/search/widgets`, you would see `I'm on another
+Now, if the location was `/`, you would still see `I am on the home page!`, but
+if the location was `/cart` or `/search/widgets`, you would see `I am on another
 page!`.
 
 ### Using the `<Link>` Component
