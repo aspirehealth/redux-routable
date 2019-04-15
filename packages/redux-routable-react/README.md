@@ -144,11 +144,11 @@ Component used to provide `router` and `history` to the rest of the application.
 
 #### Props
 
-| Name         | Type     | Description                                                                                               |
-| ------------ | -------- | --------------------------------------------------------------------------------------------------------- |
-| `router *`   | `object` | The router for your application created using the `Router` constructor from the `redux-routable` package. |
-| `history *`  | `object` | The object returned using one of the `create` functions from the `history` package.                       |
-| `children *` | `node`   | The children to be rendered.                                                                              |
+| Name         | Type     | Description                                                                         |
+| ------------ | -------- | ----------------------------------------------------------------------------------- |
+| `router *`   | `object` | The router created using `Router` from the `redux-routable` package.                |
+| `history *`  | `object` | The object returned using one of the `create` functions from the `history` package. |
+| `children *` | `node`   | The children to be rendered.                                                        |
 
 ### `<Match>`
 
@@ -168,11 +168,11 @@ application.
 
 #### Props
 
-| Name      | Type                            | Default  | Description                                                                   |
-| --------- | ------------------------------- | -------- | ----------------------------------------------------------------------------- |
-| `route *` | `any`                           |          | The name of the route to navigate to.                                         |
-| `params`  | `object{string}`                | `{}`     | The params of the route to navigate to.                                       |
-| `hash`    | `string`                        | `""`     | The hash of the route to navigate to.                                         |
-| `action`  | `"push" \| "replace" \| "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |
+| Name      | Type                            | Default  | Description                                         |
+| --------- | ------------------------------- | -------- | --------------------------------------------------- |
+| `route *` | `any`                           |          | The name of the route to navigate to.               |
+| `params`  | `object{string}`                | `{}`     | The params of the route to navigate to.             |
+| `hash`    | `string`                        | `""`     | The hash of the route to navigate to.               |
+| `action`  | `"push" \| "replace" \| "open"` | `"push"` | The Redux Routable action to dispatch when clicked. |
 
 Any other props will be passed to the root `<a>` element.
