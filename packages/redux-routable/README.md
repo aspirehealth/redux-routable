@@ -191,7 +191,7 @@ how you store your routing data or how you manage side effects.
 ## API
 
 All functions in this section are exported as named exports from the
-`redux-routable` module.
+`redux-routable` package.
 
 ### Router Configuration Constructors
 

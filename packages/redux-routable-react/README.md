@@ -23,7 +23,7 @@ package.
 
 ## Usage
 
-Redux Routable React is a companion library for integrating React and Redux
+Redux Routable React is a companion package for integrating React and Redux
 Routable. This means that before using Redux Routable React, you need create a
 `router` and a `history` object. See how to do that in Redux Routable's
 ["Usage"](https://www.npmjs.com/package/redux-routable#usage) section. For
@@ -137,7 +137,7 @@ opened (when `action="open"`), and your reducers and middleware will receive the
 ## API
 
 All components in this section are exported as named exports from the
-`redux-routable-react` module.
+`redux-routable-react` package.
 
 ### `<Routable>`
 
