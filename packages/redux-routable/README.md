@@ -138,7 +138,7 @@ the current route, we can do so easily:
 ```javascript
 import { ROUTE_CHANGED } from 'redux-routable'
 
-const reducer = (state, { type, payload }) => {
+const currentRouteReducer = (state, { type, payload }) => {
   if (type === ROUTE_CHANGED) {
     return payload.route
   } else {
@@ -154,7 +154,7 @@ can do that:
 ```javascript
 import { ROUTE_CHANGED } from 'redux-routable'
 
-const reducer = (state, { type, payload }) => {
+const userIdReducer = (state, { type, payload }) => {
   if (type === ROUTE_CHANGED) {
     if (payload.route === 'user') {
       return payload.params.id
@@ -173,7 +173,7 @@ repeatedly, so Redux Routable provides a helper for it:
 ```javascript
 import { paramsReducer } from 'redux-routable'
 
-const reducer = paramsReducer('user', null, ({ id }) => id)
+const userIdReducer = paramsReducer('user', null, ({ id }) => id)
 ```
 
 Redux Routable comes with some other helpers as well. The `changedTo` function
