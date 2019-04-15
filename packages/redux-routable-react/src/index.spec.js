@@ -93,18 +93,11 @@ describe('Match', () => {
 })
 
 describe('Link', () => {
-  test('renders <a> element by default', () => {
+  test('renders <a> element', () => {
     const { render } = mocks()
     const link = render(<Link route="home" />)
 
     expect(link.type).toBe('a')
-  })
-
-  test('renders custom component', () => {
-    const { render } = mocks()
-    const link = render(<Link component="div" route="home" />)
-
-    expect(link.type).toBe('div')
   })
 
   test('generates correct href', () => {

@@ -75,16 +75,7 @@ const isModifiedEvent = event =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey
 
 export const Link = connect()(
-  ({
-    component: Component,
-    action,
-    route,
-    params,
-    hash,
-    onClick,
-    dispatch,
-    ...props
-  }) => {
+  ({ action, route, params, hash, onClick, dispatch, ...props }) => {
     const history = useContext(HistoryContext)
     const router = useContext(RouterContext)
     const location = routeToLocation(router, route, params, hash)
@@ -111,12 +102,11 @@ export const Link = connect()(
       [onClick, target, action, route, params, hash, dispatch],
     )
 
-    return <Component {...props} href={href} onClick={handleClick} />
+    return <a {...props} href={href} onClick={handleClick} />
   },
 )
 
 Link.propTypes = {
-  component: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
   action: PropTypes.oneOf(['push', 'replace', 'open']),
   route: PropTypes.string.isRequired,
   params: PropTypes.objectOf(PropTypes.string),
@@ -125,7 +115,6 @@ Link.propTypes = {
 }
 
 Link.defaultProps = {
-  component: 'a',
   action: 'push',
   params: {},
   hash: '',

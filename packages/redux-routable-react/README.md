@@ -98,8 +98,8 @@ page!`.
 
 ### Using the `<Link>` Component
 
-The `<Link>` component can be used to navigate around your application in
-response to user clicks:
+The `<Link>` component can be used to render links that navigate around your
+application by route instead of by URL:
 
 ```javascript
 const App = () => (
@@ -121,9 +121,8 @@ This would render the following HTML:
 <a href="/search/widgets">Search for Widgets</a>
 ```
 
-As you can see, `<Link>` will render as an `<a>` element by default (this can be
-changed with the `component` prop), and the `href` attribute is set according to
-the `route`, `params`, and `hash` that were provided.
+As you can see, `<Link>` will render an `<a>` element, and the `href` attribute
+is set according to the `route`, `params`, and `hash` that were provided.
 
 These links will function exactly like normal `<a>` links, except that when
 clicked with a normal left-click (no modifier keys held down), instead of
@@ -169,12 +168,11 @@ application.
 
 #### Props
 
-| Name        | Type                            | Default  | Description                                                                   |
-| ----------- | ------------------------------- | -------- | ----------------------------------------------------------------------------- |
-| `route *`   | `any`                           |          | The name of the route to navigate to.                                         |
-| `params`    | `object{string}`                | `{}`     | The params of the route to navigate to.                                       |
-| `hash`      | `string`                        | `""`     | The hash of the route to navigate to.                                         |
-| `action`    | `"push" \| "replace" \| "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |
-| `component` | `string \| func`                | `"a"`    | The React component to render for the `Link`.                                 |
+| Name      | Type                            | Default  | Description                                                                   |
+| --------- | ------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `route *` | `any`                           |          | The name of the route to navigate to.                                         |
+| `params`  | `object{string}`                | `{}`     | The params of the route to navigate to.                                       |
+| `hash`    | `string`                        | `""`     | The hash of the route to navigate to.                                         |
+| `action`  | `"push" \| "replace" \| "open"` | `"push"` | Indicates which Redux Routable action to dispatch when the `Link` is clicked. |
 
-Any other props will be passed to the root element defined by `component`.
+Any other props will be passed to the root `<a>` element.
