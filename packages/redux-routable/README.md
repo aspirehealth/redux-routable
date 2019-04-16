@@ -311,8 +311,7 @@ the middleware, so they will never reach your reducers or other middleware.
   [`path-to-regexp`](https://www.npmjs.com/package/path-to-regexp)) and query
   params (parsed with
   [`query-string`](https://www.npmjs.com/package/query-string)). Since
-  parameters come from the location string, all values will come through as
-  strings.
+  parameters come from the location string, all values will be strings.
 
 ### Helpers
 
