@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import { connect } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import {
   Router,
   locationToRoute,
@@ -74,43 +74,43 @@ const linkActionCreators = { push, replace, open }
 const isModifiedEvent = event =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey
 
-export const Link = connect()(
-  ({ action, route, params, hash, onClick, dispatch, ...props }) => {
-    const history = useContext(HistoryContext)
-    const router = useContext(RouterContext)
-    const location = routeToLocation(router, route, params, hash)
-    const href = history.createHref(location)
-    const target = props.target || '_self'
+export const Link = ({ action, route, params, hash, onClick, ...props }) => {
+  const dispatch = useDispatch()
+  const history = useContext(HistoryContext)
+  const router = useContext(RouterContext)
+  const location = routeToLocation(router, route, params, hash)
+  const href = history.createHref(location)
+  const target = props.target || '_self'
 
-    const handleClick = useCallback(
-      event => {
-        if (onClick) onClick(event)
+  const handleClick = useCallback(
+    event => {
+      if (onClick) onClick(event)
 
-        if (
-          !event.defaultPrevented &&
-          event.button === 0 &&
-          target === '_self' &&
-          !isModifiedEvent(event)
-        ) {
-          const actionCreator = linkActionCreators[action]
-          const linkAction = actionCreator(route, params, hash)
+      if (
+        !event.defaultPrevented &&
+        event.button === 0 &&
+        target === '_self' &&
+        !isModifiedEvent(event)
+      ) {
+        const actionCreator = linkActionCreators[action]
+        const linkAction = actionCreator(route, params, hash)
 
-          event.preventDefault()
-          dispatch(linkAction)
-        }
-      },
-      [onClick, target, action, route, params, hash, dispatch],
-    )
+        event.preventDefault()
+        dispatch(linkAction)
+      }
+    },
+    [onClick, target, action, route, params, hash, dispatch],
+  )
 
-    return <a {...props} href={href} onClick={handleClick} />
-  },
-)
+  return <a {...props} href={href} onClick={handleClick} />
+}
 
 Link.propTypes = {
   action: PropTypes.oneOf(['push', 'replace', 'open']),
   route: PropTypes.string.isRequired,
   params: PropTypes.objectOf(PropTypes.string),
   hash: PropTypes.string,
+  target: PropTypes.string,
   onClick: PropTypes.func,
 }
 
