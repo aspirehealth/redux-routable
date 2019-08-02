@@ -13,8 +13,8 @@
     "prop-types": "^15.7.2"
   },
   "peerDependencies": {
-    "react": "^16.8.6",
-    "react-redux": "^7.0.3",
+    "react": "^16.8.0",
+    "react-redux": "^7.1.0",
     "redux-routable": "^1.0.0"
   }
 }
