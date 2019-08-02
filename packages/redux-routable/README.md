@@ -109,7 +109,7 @@ of the navigation actions (`PUSH`, `REPLACE`, `OPEN`, `GO`, `GO_BACK`,
 ```javascript
 import { push } from 'redux-routable'
 
-store.dispatch(push('/user/123'))
+store.dispatch(push('user', { id: '123' }))
 ```
 
 This will do 2 things:
