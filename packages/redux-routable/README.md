@@ -188,6 +188,32 @@ Even though these helper functions cover some common use cases, you can handle
 `ROUTE_CHANGED` actions however you'd like. Redux Routable does not prescribe
 how you store your routing data or how you manage side effects.
 
+### Handling `ROUTE_NOT_MATCHED` and `LOCATION_NOT_MATCHED` Actions
+
+Sometimes, things don't go exactly as planned, whether it's because of developer
+or user error. Redux Routable provides a couple of actions that allow you to
+handle errors related to routing.
+
+The `ROUTE_NOT_MATCHED` action is dispatched whenever a navigation action is
+dispatched but the route that it specifies cannot be matched to a route in
+configuration. This is usually because a developer has passed a `route` to a
+navigation action creator that doesn't exist in the router configuration. It
+also might be because the `params` passed to a navigation action creator are
+somehow invalid, as in a missing parameter or a parameter of the wrong type.
+
+The `LOCATION_NOT_MATCHED` action is dispatched whenever the location is changed
+but that location cannot be matched to a route in configuration. Since the user
+is allowed to change the location to whatever they'd like, this action is likely
+going to be dispatched, so it's a good idea to handle it. It's worth noting,
+however, that if you have a `Fallback` without a `path` in your top-level
+`Router`, then this action will never be dispatched, since that `Fallback` will
+match any location. Whether you have a top-level `Fallback` should be determined
+by whether you want to treat the user navigating to a "not found" route as an
+error condition or a normal part of the application.
+
+The shape of both of these actions is documented in the ["Action
+Types"](#action-types) section.
+
 ## API
 
 All functions in this section are exported as named exports from the
@@ -218,13 +244,14 @@ configuration for the middleware.
 - `Scope(base, router)`
 
   A `Scope` allows you to nest a `Router` within another `Router` by prepending
-  a base path to the `path` of each of the routes of the inner `Router`.
+  a base path to the `path` of each of the children of the inner `Router`.
 
-- `Router(routes)`
+- `Router(children)`
 
   A `Router` represents the configuration needed by the middleware to enable
   routing with your application. When the location changes, the location will be
-  matched against each route in order until a match is found.
+  matched against each child in order until a match is found. Any instance of
+  the above router configuration functions are valid `Router` children.
 
 The `path` parameter of `Route`, `Redirect`, and `Fallback` is matched with
 [`path-to-regexp`](https://www.npmjs.com/package/path-to-regexp). Refer to their
@@ -287,11 +314,12 @@ the middleware, so they will never reach your reducers or other middleware.
 - `ROUTE_CHANGED`
 
   An action with this type will be dispatched whenever the location is changed
-  (and by dispatching a `SYNC` action). Since all of the navigation actions
-  (with the exception of `OPEN`) change the location, you can expect this action
-  to be dispatched immediately after dispatching any of those. Actions with type
-  `ROUTE_CHANGED` are what you should listen for in your reducers and other
-  middleware, and they have this shape:
+  (and by dispatching a `SYNC` action) and the location is able to be matched
+  with a route from the router configuration. Since all of the navigation
+  actions (with the exception of `OPEN`) change the location, you can expect
+  this action to be dispatched immediately after dispatching any of those.
+  Actions with type `ROUTE_CHANGED` are what you should listen for in your
+  reducers and other middleware, and they have this shape:
 
   ```javascript
   {
@@ -312,6 +340,54 @@ the middleware, so they will never reach your reducers or other middleware.
   params (parsed with
   [`query-string`](https://www.npmjs.com/package/query-string)). Since
   parameters come from the location string, all values will be strings.
+
+- `ROUTE_NOT_MATCHED`
+
+  An action with this type will be dispatched whenever a `PUSH`, `REPLACE`, or
+  `OPEN` navigation action is dispatched and the provided `route` or `params` is
+  not able to be matched with a route in the router configuration. The `message`
+  of the `RouteMatchError` in the payload will state the reason that the route
+  could not be matched. These actions have this shape:
+
+  ```javascript
+  {
+    type: ROUTE_NOT_MATCHED,
+    error: true,
+    payload: ..., // RouteMatchError
+    meta: {
+      route: ...,
+      params: { ... },
+      hash: ...
+    }
+  }
+  ```
+
+  `meta` will have the same properties as the `payload` of the `ROUTE_CHANGED`
+  action above.
+
+- `LOCATION_NOT_MATCHED`
+
+  An action with this type will be dispatched whenever the location is changed
+  (and by dispatching a `SYNC` action) and the location is not able to be
+  matched with a route from the router configuration. This action will only end
+  up being dispatched if you do not have a `Fallback` without a `path` in your
+  top-level `Router`. These actions have this shape:
+
+  ```javascript
+  {
+    type: LOCATION_NOT_MATCHED,
+    error: true,
+    payload: ..., // LocationMatchError
+    meta: {
+      location: { ... }
+    }
+  }
+  ```
+
+  `meta.location` will be the location that failed to match as provided by the
+  `history` package. Read the
+  ["Properties"](https://github.com/ReactTraining/history#properties) section of
+  their README to see the properties on this object.
 
 ### Helpers
 

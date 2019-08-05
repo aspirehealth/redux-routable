@@ -3,8 +3,13 @@ import { applyMiddleware, createStore } from 'redux'
 import configureStore from 'redux-mock-store'
 import {
   Fallback,
+  LOCATION_NOT_MATCHED,
+  LocationMatchError,
+  ROUTE_CHANGED,
+  ROUTE_NOT_MATCHED,
   Redirect,
   Route,
+  RouteMatchError,
   Router,
   Scope,
   changedTo,
@@ -18,7 +23,6 @@ import {
   paramsReducer,
   push,
   replace,
-  routeChanged,
   sync,
 } from './index'
 
@@ -85,16 +89,18 @@ describe('middleware', () => {
     const action = { type: 'TEST' }
 
     store.dispatch(action)
-    expect(store.getActions()).toEqual([action])
+    expect(store.getActions()).toContainEqual(action)
   })
 
   test('keeps track of previous ROUTE_CHANGED action', () => {
     const { store } = mocks()
-    const action = routeChanged('cart', {}, '')
 
     store.dispatch(replace('cart'))
     store.dispatch(replace('home'))
-    expect(store.getActions()[1].meta.previous).toEqual(action.payload)
+
+    const [{ payload }, { meta }] = store.getActions()
+
+    expect(meta.previous).toEqual(payload)
   })
 })
 
@@ -132,18 +138,26 @@ describe('helpers', () => {
   })
 
   test('changedTo() creates an action predicate for a single route', () => {
-    const isCartAction = changedTo('cart')
+    const { store } = mocks()
+    const changedToCart = changedTo('cart')
 
-    expect(isCartAction(routeChanged('home'))).toBe(false)
-    expect(isCartAction(routeChanged('cart'))).toBe(true)
+    store.dispatch(replace('home'))
+    store.dispatch(replace('cart'))
+    expect(store.getActions().map(changedToCart)).toEqual([false, true])
   })
 
   test('changedTo() creates an action predicate for multiple routes', () => {
-    const isCartOrSearchAction = changedTo(['cart', 'search'])
+    const { store } = mocks()
+    const changedToCartOrSearch = changedTo(['cart', 'search'])
 
-    expect(isCartOrSearchAction(routeChanged('home'))).toBe(false)
-    expect(isCartOrSearchAction(routeChanged('cart'))).toBe(true)
-    expect(isCartOrSearchAction(routeChanged('search'))).toBe(true)
+    store.dispatch(replace('home'))
+    store.dispatch(replace('cart'))
+    store.dispatch(replace('search'))
+    expect(store.getActions().map(changedToCartOrSearch)).toEqual([
+      false,
+      true,
+      true,
+    ])
   })
 
   test('entered() creates an action predicate for a single route', () => {
@@ -171,7 +185,7 @@ describe('helpers', () => {
     ])
   })
 
-  test('routeExited() creates an action predicate for a single route', () => {
+  test('exited() creates an action predicate for a single route', () => {
     const { store } = mocks()
     const homeExited = exited('home')
     const cartExited = exited('cart')
@@ -183,7 +197,7 @@ describe('helpers', () => {
     expect(store.getActions().map(cartExited)).toEqual([false, false, true])
   })
 
-  test('routeExited() creates an action predicate for multiple routes', () => {
+  test('exited() creates an action predicate for multiple routes', () => {
     const { store } = mocks()
     const homeOrCartExited = exited(['home', 'cart'])
 
@@ -204,10 +218,17 @@ describe('side effects', () => {
   test('dispatching SYNC action dispatches ROUTE_CHANGED action for current location', () => {
     const historyOptions = { initialEntries: ['/item/123'] }
     const { store } = mocks({ historyOptions })
-    const action = routeChanged('item', { itemId: '123' }, '')
 
     store.dispatch(sync())
-    expect(store.getActions()).toEqual([action])
+
+    const [{ type, payload }] = store.getActions()
+
+    expect(type).toBe(ROUTE_CHANGED)
+    expect(payload).toEqual({
+      route: 'item',
+      params: { itemId: '123' },
+      hash: '',
+    })
   })
 
   test('dispatching PUSH action adds entry to history stack', () => {
@@ -261,19 +282,71 @@ describe('side effects', () => {
   })
 })
 
-describe('an error is thrown', () => {
-  test('when putting a Router in a Router', () => {
-    expect(() => Router([Router([])])).toThrow()
+describe('match error actions', () => {
+  test('navigating to route that does not exist dispatches ROUTE_NOT_MATCHED action', () => {
+    const { store } = mocks({ router: Router([]) })
+
+    store.dispatch(replace('nonsense'))
+
+    const [{ type, payload, error, meta }] = store.getActions()
+
+    expect(type).toEqual(ROUTE_NOT_MATCHED)
+    expect(error).toBe(true)
+    expect(payload).toBeInstanceOf(RouteMatchError)
+    expect(meta).toEqual({ route: 'nonsense', params: {}, hash: '' })
   })
 
-  test("when navigating to a route that doesn't exist", () => {
+  test('navigating to route with invalid params dispatches ROUTE_NOT_MATCHED action', () => {
     const { store } = mocks()
-    expect(() => store.dispatch(replace('nonsense'))).toThrow()
+
+    store.dispatch(replace('item'))
+
+    const [{ type, payload, error, meta }] = store.getActions()
+
+    expect(type).toEqual(ROUTE_NOT_MATCHED)
+    expect(error).toBe(true)
+    expect(payload).toBeInstanceOf(RouteMatchError)
+    expect(meta).toEqual({ route: 'item', params: {}, hash: '' })
   })
 
-  test("when location doesn't match a route", () => {
-    const { history } = mocks({ router: Router([]) })
-    expect(() => history.replace('/nonsense')).toThrow()
+  test('changing to location that does not match a route dispatches LOCATION_NOT_MATCHED action', () => {
+    const { store, history } = mocks({ router: Router([]) })
+
+    history.replace('/nonsense')
+
+    const [{ type, payload, error, meta }] = store.getActions()
+
+    expect(type).toEqual(LOCATION_NOT_MATCHED)
+    expect(error).toBe(true)
+    expect(payload).toBeInstanceOf(LocationMatchError)
+    expect(meta).toMatchObject({ location: { pathname: '/nonsense' } })
+  })
+})
+
+describe('an error is thrown', () => {
+  test('when a route is not passed to a router configuration function', () => {
+    expect(() => Route()).toThrow(TypeError)
+    expect(() => Redirect()).toThrow(TypeError)
+    expect(() => Fallback()).toThrow(TypeError)
+  })
+
+  test('when a non-string path is passed to a router configuration function', () => {
+    expect(() => Route('test', 123)).toThrow(TypeError)
+    expect(() => Redirect('test', 123)).toThrow(TypeError)
+    expect(() => Fallback('test', 123)).toThrow(TypeError)
+    expect(() => Scope(123, Router([]))).toThrow(TypeError)
+  })
+
+  test('when a Router is not passed to a Scope', () => {
+    expect(() => Scope('/test')).toThrow(TypeError)
+  })
+
+  test('when invalid children are passed to a Router', () => {
+    expect(() => Router('nonsense')).toThrow(TypeError)
+  })
+
+  test('when an invalid child is passed to a Router', () => {
+    expect(() => Router(['nonsense'])).toThrow(TypeError)
   })
 })
 
@@ -301,17 +374,20 @@ describe('changing the location', () => {
   ]
 
   tests.forEach(([path, route, params, hash]) => {
-    test(`dispatches correct action when changed to '${path}'`, () => {
+    test(`dispatches ROUTE_CHANGED action when changed to '${path}'`, () => {
       const { store, history } = mocks()
-      const action = routeChanged(route, params, hash)
 
       history.replace(path)
-      expect(store.getActions()).toEqual([action])
+
+      const [{ type, payload }] = store.getActions()
+
+      expect(type).toBe(ROUTE_CHANGED)
+      expect(payload).toEqual({ route, params, hash })
     })
   })
 })
 
-describe('dispatching an action', () => {
+describe('dispatching a navigation action', () => {
   const tests = [
     ['home', undefined, undefined, '/'],
     ['cart', undefined, undefined, '/cart'],

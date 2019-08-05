@@ -8,6 +8,8 @@ import React, {
 } from 'react'
 import { useDispatch } from 'react-redux'
 import {
+  LocationMatchError,
+  RouteMatchError,
   Router,
   locationToRoute,
   open,
@@ -23,16 +25,30 @@ const CurrentRouteContext = createContext()
 // Routable Component
 export const Routable = ({ router, history, children }) => {
   const [currentRoute, setCurrentRoute] = useState(() => {
-    const { route } = locationToRoute(router, history.location)
-    return route
+    try {
+      return locationToRoute(router, history.location).route
+    } catch (error) {
+      if (error instanceof LocationMatchError) {
+        return null
+      } else {
+        throw error
+      }
+    }
   })
 
   useEffect(() => {
     return history.listen(location => {
-      const { route } = locationToRoute(router, location)
-      setCurrentRoute(route)
+      try {
+        setCurrentRoute(locationToRoute(router, location).route)
+      } catch (error) {
+        if (error instanceof LocationMatchError) {
+          setCurrentRoute(null)
+        } else {
+          throw error
+        }
+      }
     })
-  }, [router, history])
+  }, [router, history, setCurrentRoute])
 
   return (
     <HistoryContext.Provider value={history}>
@@ -54,6 +70,11 @@ Routable.propTypes = {
 // Match Component
 export const Match = ({ route, children }) => {
   const currentRoute = useContext(CurrentRouteContext)
+
+  if (currentRoute === null) {
+    return null
+  }
+
   const routes = route instanceof Array ? route : [route]
   const match = routes.includes(currentRoute.name)
 
@@ -78,7 +99,19 @@ export const Link = ({ action, route, params, hash, onClick, ...props }) => {
   const dispatch = useDispatch()
   const history = useContext(HistoryContext)
   const router = useContext(RouterContext)
-  const location = routeToLocation(router, route, params, hash)
+  let location
+
+  try {
+    location = routeToLocation(router, route, params, hash)
+  } catch (error) {
+    if (error instanceof RouteMatchError) {
+      console.error(error)
+      return null
+    } else {
+      throw error
+    }
+  }
+
   const href = history.createHref(location)
   const target = props.target || '_self'
 

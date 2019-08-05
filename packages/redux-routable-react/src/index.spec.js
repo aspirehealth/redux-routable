@@ -3,7 +3,7 @@ import React from 'react'
 import { Provider } from 'react-redux'
 import { act, create } from 'react-test-renderer'
 import configureStore from 'redux-mock-store'
-import { Route, Router, createMiddleware, routeChanged } from 'redux-routable'
+import { ROUTE_CHANGED, Route, Router, createMiddleware } from 'redux-routable'
 import { Link, Match, Routable } from './index'
 
 const mockRouter = Router([
@@ -26,6 +26,7 @@ const mocks = ({ historyOptions, router = mockRouter } = {}) => {
   const history = createMemoryHistory(historyOptions)
   const middleware = createMiddleware(router, history)
   const store = configureStore([middleware])()
+
   // eslint-disable-next-line react/prop-types
   const Test = ({ children }) => (
     <Provider store={store}>
@@ -34,11 +35,20 @@ const mocks = ({ historyOptions, router = mockRouter } = {}) => {
       </Routable>
     </Provider>
   )
-  const render = children => create(<Test>{children}</Test>).toJSON()
 
-  window.open = jest.fn()
+  const make = element => {
+    let renderer
 
-  return { store, history, window, render, Test }
+    act(() => {
+      renderer = create(<Test>{element}</Test>)
+    })
+
+    return { render: () => renderer.toJSON() }
+  }
+
+  const render = element => make(element).render()
+
+  return { store, history, make, render }
 }
 
 describe('Match', () => {
@@ -71,24 +81,31 @@ describe('Match', () => {
   })
 
   test('renders correct content when location is changed', () => {
-    let renderer
-    const { history, Test } = mocks()
-    const element = (
-      <Test>
+    const { history, make } = mocks()
+    const matches = make(
+      <React.Fragment>
         <Match route="home">home</Match>
         <Match route="search">search</Match>
-      </Test>
+      </React.Fragment>,
     )
 
-    act(() => {
-      renderer = create(element)
-    })
-
-    expect(renderer.toJSON()).toBe('home')
+    expect(matches.render()).toBe('home')
     act(() => history.replace('/search/widgets'))
-    expect(renderer.toJSON()).toBe('search')
+    expect(matches.render()).toBe('search')
     act(() => history.replace('/'))
-    expect(renderer.toJSON()).toBe('home')
+    expect(matches.render()).toBe('home')
+  })
+
+  test('does not render when location does not match a route', () => {
+    const historyOptions = { initialEntries: ['/nonsense'] }
+    const { history, make } = mocks({ historyOptions })
+    const match = make(<Match route="home">matched</Match>)
+
+    expect(match.render()).toBe(null)
+    act(() => history.replace('/'))
+    expect(match.render()).toBe('matched')
+    act(() => history.replace('/nonsense'))
+    expect(match.render()).toBe(null)
   })
 })
 
@@ -122,16 +139,20 @@ describe('Link', () => {
 
   test('dispatches action when left-clicked', () => {
     const { store, render } = mocks()
-    const action = routeChanged('home', {}, '')
     const link = render(<Link route="home" />)
 
     link.props.onClick(mockEvent())
 
-    expect(store.getActions()).toEqual([action])
+    const [{ type, payload }] = store.getActions()
+
+    expect(type).toBe(ROUTE_CHANGED)
+    expect(payload).toEqual({ route: 'home', params: {}, hash: '' })
   })
 
   test('calls window.open() when left-clicked', () => {
-    const { render, window } = mocks()
+    window.open = jest.fn()
+
+    const { render } = mocks()
     const link = render(<Link route="home" action="open" />)
 
     link.props.onClick(mockEvent())
@@ -172,5 +193,15 @@ describe('Link', () => {
     link.props.onClick(event)
 
     expect(onClick).toHaveBeenCalledWith(event)
+  })
+
+  test('does not render and logs an error when route does not exist', () => {
+    console.error = jest.fn()
+
+    const { render } = mocks()
+    const link = render(<Link route="nonsense" />)
+
+    expect(link).toBe(null)
+    expect(console.error).toHaveBeenCalled()
   })
 })

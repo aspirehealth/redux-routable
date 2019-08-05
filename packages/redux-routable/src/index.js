@@ -1,15 +1,23 @@
 import pathToRegexp from 'path-to-regexp'
 import queryString from 'query-string'
 
+// Errors
+export class RouteMatchError extends Error {}
+export class LocationMatchError extends Error {}
+
 // Action Types
-const SYNC = '@@reduxRoutable/SYNC'
-const PUSH = '@@reduxRoutable/PUSH'
-const REPLACE = '@@reduxRoutable/REPLACE'
-const OPEN = '@@reduxRoutable/OPEN'
-const GO = '@@reduxRoutable/GO'
-const GO_BACK = '@@reduxRoutable/GO_BACK'
-const GO_FORWARD = '@@reduxRoutable/GO_FORWARD'
-export const ROUTE_CHANGED = '@@reduxRoutable/ROUTE_CHANGED'
+const createType = type => '@@reduxRoutable/' + type
+
+const SYNC = createType('SYNC')
+const PUSH = createType('PUSH')
+const REPLACE = createType('REPLACE')
+const OPEN = createType('OPEN')
+const GO = createType('GO')
+const GO_BACK = createType('GO_BACK')
+const GO_FORWARD = createType('GO_FORWARD')
+export const ROUTE_CHANGED = createType('ROUTE_CHANGED')
+export const ROUTE_NOT_MATCHED = createType('ROUTE_NOT_MATCHED')
+export const LOCATION_NOT_MATCHED = createType('LOCATION_NOT_MATCHED')
 
 // Action Creators
 export const sync = () => ({
@@ -44,61 +52,112 @@ export const goForward = () => ({
   type: GO_FORWARD,
 })
 
-export const routeChanged = (route, params, hash, previous) => ({
+const routeChanged = (route, params, hash, previous) => ({
   type: ROUTE_CHANGED,
   payload: { route, params, hash },
   meta: { previous },
 })
 
+const routeNotMatched = (error, route, params, hash) => ({
+  type: ROUTE_NOT_MATCHED,
+  error: true,
+  payload: error,
+  meta: { route, params, hash },
+})
+
+const locationNotMatched = (error, location) => ({
+  type: LOCATION_NOT_MATCHED,
+  error: true,
+  payload: error,
+  meta: { location },
+})
+
 // Router Configuration
-const create = (constructor, properties) => {
+const createConfig = (constructor, properties) => {
   const instance = Object.create(constructor.prototype)
   return Object.assign(instance, properties)
 }
 
 export function Route(name, path = '') {
-  return create(Route, { name, path, pattern: pathToRegexp(path) })
+  if (name === undefined) {
+    throw new TypeError("'name' cannot be undefined")
+  }
+
+  if (typeof path !== 'string') {
+    throw new TypeError(`${path} is not a string`)
+  }
+
+  return createConfig(Route, { name, path, pattern: pathToRegexp(path) })
 }
 
 export function Redirect(to, path = '') {
-  return create(Redirect, { to, path, pattern: pathToRegexp(path) })
+  if (to === undefined) {
+    throw new TypeError("'to' cannot be undefined")
+  }
+
+  if (typeof path !== 'string') {
+    throw new TypeError(`${path} is not a string`)
+  }
+
+  return createConfig(Redirect, { to, path, pattern: pathToRegexp(path) })
 }
 
 export function Fallback(name, path = '') {
+  if (name === undefined) {
+    throw new TypeError("'name' cannot be undefined")
+  }
+
+  if (typeof path !== 'string') {
+    throw new TypeError(`${path} is not a string`)
+  }
+
   const pattern = pathToRegexp(path, null, { end: false })
-  return create(Fallback, { name, path: '', pattern })
+
+  return createConfig(Fallback, { name, path: '', pattern })
 }
 
 export function Scope(base, router) {
-  const scopedRoutes = router.routes.map(route => {
-    switch (route.constructor) {
+  if (typeof base !== 'string') {
+    throw new TypeError(`${base} is not a string`)
+  }
+
+  if (!(router instanceof Router)) {
+    throw new TypeError(`${router} is not a Router`)
+  }
+
+  const scopedChildren = router.children.map(child => {
+    switch (child.constructor) {
       case Fallback:
-        return Fallback(route.name, base + route.path)
+        return Fallback(child.name, base + child.path)
       case Redirect:
-        return Redirect(route.to, base + route.path)
+        return Redirect(child.to, base + child.path)
       case Route:
-        return Route(route.name, base + route.path)
+        return Route(child.name, base + child.path)
     }
   })
 
-  return create(Scope, { base, routes: scopedRoutes })
+  return createConfig(Scope, { base, children: scopedChildren })
 }
 
-export function Router(routes) {
-  const resolvedRoutes = routes.reduce((routes, route) => {
-    switch (route.constructor) {
-      case Router:
-        throw Error('A Router is not allowed within a Router')
+export function Router(children) {
+  if (!(children instanceof Array)) {
+    throw new TypeError(`${children} is not an Array`)
+  }
+
+  const resolvedChildren = children.reduce((children, child) => {
+    switch (child.constructor) {
       case Scope:
-        return routes.concat(route.routes)
+        return children.concat(child.children)
       case Fallback:
       case Redirect:
       case Route:
-        return routes.concat([route])
+        return children.concat([child])
+      default:
+        throw new TypeError(`${child} is not a valid Router child`)
     }
   }, [])
 
-  return create(Router, { routes: resolvedRoutes })
+  return createConfig(Router, { children: resolvedChildren })
 }
 
 // Helpers
@@ -158,28 +217,34 @@ const keyFilter = (object, condition) =>
 
 // Route/Location Translation
 export const routeToLocation = (router, name, params, hash) => {
-  const route = router.routes.find(
-    route => route instanceof Route && route.name === name,
+  const route = router.children.find(
+    child => child instanceof Route && child.name === name,
   )
 
   if (route === undefined) {
-    throw Error(`No route found with name '${name}'`)
+    throw new RouteMatchError(`No route matching route name: ${name}`)
   }
 
   const pathParamNames = getPathParamNames(route.path)
   const pathParams = keyFilter(params, key => pathParamNames.includes(key))
   const queryParams = keyFilter(params, key => !pathParamNames.includes(key))
-  const pathname = pathToRegexp.compile(route.path)(pathParams)
   const search = queryString.stringify(queryParams)
+  let pathname
+
+  try {
+    pathname = pathToRegexp.compile(route.path)(pathParams)
+  } catch (error) {
+    throw new RouteMatchError(error.message)
+  }
 
   return { pathname, search, hash }
 }
 
 export const locationToRoute = (router, { pathname, search, hash }) => {
-  const route = router.routes.find(route => route.pattern.test(pathname))
+  const route = router.children.find(child => child.pattern.test(pathname))
 
   if (route === undefined) {
-    throw Error(`No route found matching path '${pathname}'`)
+    throw new LocationMatchError(`No route matching location path: ${pathname}`)
   }
 
   const pathParamNames = getPathParamNames(route.path)
@@ -204,12 +269,20 @@ export const createMiddleware = (router, history) => store => {
   let previous
 
   const historyListener = location => {
-    const { route, params, hash } = locationToRoute(router, location)
+    try {
+      const { route, params, hash } = locationToRoute(router, location)
 
-    if (route instanceof Redirect) {
-      history.replace(routeToLocation(router, route.to, params, hash))
-    } else {
-      store.dispatch(routeChanged(route.name, params, hash, previous))
+      if (route instanceof Redirect) {
+        history.replace(routeToLocation(router, route.to, params, hash))
+      } else {
+        store.dispatch(routeChanged(route.name, params, hash, previous))
+      }
+    } catch (error) {
+      if (error instanceof LocationMatchError) {
+        store.dispatch(locationNotMatched(error, location))
+      } else {
+        throw error
+      }
     }
   }
 
@@ -220,18 +293,27 @@ export const createMiddleware = (router, history) => store => {
       historyListener(history.location)
     } else if (isAbsoluteAction(action)) {
       const { route, params, hash } = action.payload
-      const location = routeToLocation(router, route, params, hash)
 
-      switch (action.type) {
-        case PUSH:
-          history.push(location)
-          break
-        case REPLACE:
-          history.replace(location)
-          break
-        case OPEN:
-          window.open(location)
-          break
+      try {
+        const location = routeToLocation(router, route, params, hash)
+
+        switch (action.type) {
+          case PUSH:
+            history.push(location)
+            break
+          case REPLACE:
+            history.replace(location)
+            break
+          case OPEN:
+            window.open(location)
+            break
+        }
+      } catch (error) {
+        if (error instanceof RouteMatchError) {
+          store.dispatch(routeNotMatched(error, route, params, hash))
+        } else {
+          throw error
+        }
       }
     } else if (isRelativeAction(action)) {
       switch (action.type) {

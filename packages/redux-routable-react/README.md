@@ -133,6 +133,10 @@ page load (when `action="push"` or `action="replace"`) or a new tab will be
 opened (when `action="open"`), and your reducers and middleware will receive the
 `ROUTE_CHANGED` action.
 
+It's possible that either the `route` or `params` that you pass to a `<Link>`
+will not match with a route in the router configuration. If that is the case, an
+error will be logged, and the component will simply render `null`.
+
 ## API
 
 All components in this section are exported as named exports from the
