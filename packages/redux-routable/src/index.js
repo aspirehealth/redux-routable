@@ -161,15 +161,16 @@ export function Router(children) {
 }
 
 // Helpers
-export const paramsReducer = (route, defaultVal, paramsSelector) => {
+export const paramsReducer = (route, ...rest) => {
+  const [awayVal, paramsSelector] = rest.length === 1 ? [null, ...rest] : rest
   const routes = route instanceof Array ? route : [route]
 
-  return (state = defaultVal, { type, payload }) => {
+  return (state = awayVal, { type, payload }) => {
     if (type === ROUTE_CHANGED) {
       if (routes.includes(payload.route)) {
         return paramsSelector(payload.params)
       } else {
-        return defaultVal
+        return awayVal
       }
     } else {
       return state

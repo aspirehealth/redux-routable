@@ -48,6 +48,9 @@ const mocks = ({ historyOptions, router = mockRouter } = {}) => {
 
   const render = element => make(element).render()
 
+  window.open = jest.fn()
+  console.error = jest.fn()
+
   return { store, history, make, render }
 }
 
@@ -150,8 +153,6 @@ describe('Link', () => {
   })
 
   test('calls window.open() when left-clicked', () => {
-    window.open = jest.fn()
-
     const { render } = mocks()
     const link = render(<Link route="home" action="open" />)
 
@@ -196,8 +197,6 @@ describe('Link', () => {
   })
 
   test('does not render and logs an error when route does not exist', () => {
-    console.error = jest.fn()
-
     const { render } = mocks()
     const link = render(<Link route="nonsense" />)
 

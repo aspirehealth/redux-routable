@@ -173,7 +173,7 @@ repeatedly, so Redux Routable provides a helper for it:
 ```javascript
 import { paramsReducer } from 'redux-routable'
 
-const userIdReducer = paramsReducer('user', null, ({ id }) => id)
+const userIdReducer = paramsReducer('user', ({ id }) => id)
 ```
 
 Redux Routable comes with some other helpers as well. The `changedTo` function
@@ -391,12 +391,12 @@ the middleware, so they will never reach your reducers or other middleware.
 
 ### Helpers
 
-- `paramsReducer(route, defaultVal, paramsSelector)`
+- `paramsReducer(route, [awayVal=null], paramsSelector)`
 
   This function creates a reducer that evaluates `paramsSelector` against the
   `payload.params` of a `ROUTE_CHANGED` action when navigated to the specified
   `route`. When navigated away from `route`, the reducer will evaluate to
-  `defaultVal`.
+  `awayVal`.
 
 - `changedTo(route)`
 

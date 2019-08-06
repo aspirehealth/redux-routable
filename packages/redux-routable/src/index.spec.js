@@ -55,14 +55,16 @@ const mockRouter = Router([
   Fallback('notFound'),
 ])
 
-const mocks = ({ historyOptions, router = mockRouter } = {}) => {
+const mocks = ({ historyOptions, reducer, router = mockRouter } = {}) => {
   const history = createMemoryHistory(historyOptions)
   const middleware = createMiddleware(router, history)
-  const store = configureStore([middleware])()
+  const store = reducer
+    ? createStore(reducer, applyMiddleware(middleware))
+    : configureStore([middleware])()
 
   window.open = jest.fn()
 
-  return { store, history, window }
+  return { store, history }
 }
 
 describe('middleware', () => {
@@ -106,10 +108,8 @@ describe('middleware', () => {
 
 describe('helpers', () => {
   test('paramsReducer() creates a reducer for params for a single route', () => {
-    const reducer = paramsReducer('item', null, ({ itemId }) => itemId)
-    const history = createMemoryHistory()
-    const middleware = createMiddleware(mockRouter, history)
-    const store = createStore(reducer, applyMiddleware(middleware))
+    const reducer = paramsReducer('item', ({ itemId }) => itemId)
+    const { store } = mocks({ reducer })
 
     expect(store.getState()).toBe(null)
     store.dispatch(replace('item', { itemId: '123' }))
@@ -121,12 +121,9 @@ describe('helpers', () => {
   test('paramsReducer() creates a reducer for params for multiple routes', () => {
     const reducer = paramsReducer(
       ['item', 'user'],
-      null,
       ({ userId, itemId }) => userId || itemId,
     )
-    const history = createMemoryHistory()
-    const middleware = createMiddleware(mockRouter, history)
-    const store = createStore(reducer, applyMiddleware(middleware))
+    const { store } = mocks({ reducer })
 
     expect(store.getState()).toBe(null)
     store.dispatch(replace('item', { itemId: '123' }))
@@ -135,6 +132,17 @@ describe('helpers', () => {
     expect(store.getState()).toBe('456')
     store.dispatch(replace('home'))
     expect(store.getState()).toBe(null)
+  })
+
+  test('paramsReducer() accepts an awayVal', () => {
+    const reducer = paramsReducer('item', '123', ({ itemId }) => itemId)
+    const { store } = mocks({ reducer })
+
+    expect(store.getState()).toBe('123')
+    store.dispatch(replace('item', { itemId: '456' }))
+    expect(store.getState()).toBe('456')
+    store.dispatch(replace('home'))
+    expect(store.getState()).toBe('123')
   })
 
   test('changedTo() creates an action predicate for a single route', () => {
@@ -246,7 +254,7 @@ describe('side effects', () => {
   })
 
   test('dispatching OPEN action calls window.open()', () => {
-    const { store, window } = mocks()
+    const { store } = mocks()
 
     store.dispatch(open('home'))
     expect(window.open).toHaveBeenCalled()
