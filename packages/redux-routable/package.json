@@ -1,6 +1,6 @@
 {
   "name": "redux-routable",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple Routing Middleware for Redux",
   "main": "lib/index.js",
   "author": "Jamin Thornsberry",
