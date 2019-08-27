@@ -158,7 +158,7 @@ describe('Link', () => {
 
     link.props.onClick(mockEvent())
 
-    expect(window.open).toHaveBeenCalled()
+    expect(window.open).toHaveBeenCalledWith('/')
   })
 
   test('prevents default when left-clicked', () => {

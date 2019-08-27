@@ -306,7 +306,7 @@ export const createMiddleware = (router, history) => store => {
             history.replace(location)
             break
           case OPEN:
-            window.open(location)
+            window.open(history.createHref(location))
             break
         }
       } catch (error) {

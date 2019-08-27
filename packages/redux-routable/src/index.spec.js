@@ -257,7 +257,7 @@ describe('side effects', () => {
     const { store } = mocks()
 
     store.dispatch(open('home'))
-    expect(window.open).toHaveBeenCalled()
+    expect(window.open).toHaveBeenCalledWith('/')
   })
 
   test('dispatching GO action navigates history stack', () => {
