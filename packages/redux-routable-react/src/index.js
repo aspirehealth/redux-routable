@@ -95,7 +95,7 @@ const linkActionCreators = { push, replace, open }
 const isModifiedEvent = event =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey
 
-export const Link = ({ action, route, params, hash, onClick, ...props }) => {
+export let Link = ({ action, route, params, hash, onClick, ...props }, ref) => {
   const dispatch = useDispatch()
   const history = useContext(HistoryContext)
   const router = useContext(RouterContext)
@@ -135,8 +135,10 @@ export const Link = ({ action, route, params, hash, onClick, ...props }) => {
     [onClick, target, action, route, params, hash, dispatch],
   )
 
-  return <a {...props} href={href} onClick={handleClick} />
+  return <a {...props} ref={ref} href={href} onClick={handleClick} />
 }
+
+Link = React.forwardRef(Link)
 
 Link.propTypes = {
   action: PropTypes.oneOf(['push', 'replace', 'open']),
