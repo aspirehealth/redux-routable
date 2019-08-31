@@ -65,14 +65,14 @@ ReactDOM.render(
 ### Using the `<Match>` Component
 
 You can use the `<Match>` component to conditionally render content based on the
-current route. Just pass a route name into the `route` prop to match on a
-specific route:
+current route. Just pass a route name into the `on` prop to match on a specific
+route:
 
 ```javascript
 const App = () => (
   <React.Fragment>
-    <Match route="home">I am on the home page!</Match>
-    <Match route="cart">I am on the cart page!</Match>
+    <Match on="home">I am on the home page!</Match>
+    <Match on="cart">I am on the cart page!</Match>
   </React.Fragment>
 )
 ```
@@ -80,14 +80,14 @@ const App = () => (
 So, if the location was `/`, you would see `I am on the home page!`, and if the
 location was `/cart`, you would see `I am on the cart page!`.
 
-You can also pass an array of route names to the `route` prop to match on
-multiple routes:
+You can also pass an array of route names to the `on` prop to match on multiple
+routes:
 
 ```javascript
 const App = () => (
   <React.Fragment>
-    <Match route="home">I am on the home page!</Match>
-    <Match route={['cart', 'search']}>I am on another page!</Match>
+    <Match on="home">I am on the home page!</Match>
+    <Match on={['cart', 'search']}>I am on another page!</Match>
   </React.Fragment>
 )
 ```
@@ -160,10 +160,10 @@ Component used to conditionally render content depending on the current route.
 
 #### Props
 
-| Name         | Type                 | Description                                                          |
-| ------------ | -------------------- | -------------------------------------------------------------------- |
-| `route *`    | `string \| string[]` | A route name or names to match against the current location.         |
-| `children *` | `node`               | The children to be rendered if `route` matches the current location. |
+| Name         | Type   | Description                                                                                                                    |
+| ------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `on *`       | `any`  | A "matchable" value (route name, array of route names, or Redux Routable config object) to match against the current location. |
+| `children *` | `node` | The children to be rendered if `on` matches the current location.                                                              |
 
 ### `<Link>`
 

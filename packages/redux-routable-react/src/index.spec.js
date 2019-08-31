@@ -57,28 +57,28 @@ const mocks = ({ historyOptions, router = mockRouter } = {}) => {
 describe('Match', () => {
   test('renders when matched on a single route', () => {
     const { render } = mocks()
-    const match = render(<Match route="home">matched</Match>)
+    const match = render(<Match on="home">matched</Match>)
 
     expect(match).toBe('matched')
   })
 
   test('does not render when not matched on a single route', () => {
     const { render } = mocks()
-    const match = render(<Match route="search">matched</Match>)
+    const match = render(<Match on="search">matched</Match>)
 
     expect(match).toBe(null)
   })
 
   test('renders when matched on multiple routes', () => {
     const { render } = mocks()
-    const match = render(<Match route={['home', 'search']}>matched</Match>)
+    const match = render(<Match on={['home', 'search']}>matched</Match>)
 
     expect(match).toBe('matched')
   })
 
   test('does not render when not matched on multiple routes', () => {
     const { render } = mocks()
-    const match = render(<Match route={[]}>matched</Match>)
+    const match = render(<Match on={[]}>matched</Match>)
 
     expect(match).toBe(null)
   })
@@ -87,8 +87,8 @@ describe('Match', () => {
     const { history, make } = mocks()
     const matches = make(
       <React.Fragment>
-        <Match route="home">home</Match>
-        <Match route="search">search</Match>
+        <Match on="home">home</Match>
+        <Match on="search">search</Match>
       </React.Fragment>,
     )
 
@@ -102,7 +102,7 @@ describe('Match', () => {
   test('does not render when location does not match a route', () => {
     const historyOptions = { initialEntries: ['/nonsense'] }
     const { history, make } = mocks({ historyOptions })
-    const match = make(<Match route="home">matched</Match>)
+    const match = make(<Match on="home">matched</Match>)
 
     expect(match.render()).toBe(null)
     act(() => history.replace('/'))

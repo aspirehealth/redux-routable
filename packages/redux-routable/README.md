@@ -147,9 +147,9 @@ const currentRouteReducer = (state, { type, payload }) => {
 }
 ```
 
-What if we want a reducer that stores the ID of a user whenever we are navigated
-to the `user` route, and clears it whenever we are navigated away? Here's how we
-can do that:
+What if we want a reducer that stores the ID of a user whenever we navigate to
+the `user` route, and clears it whenever we navigate away? Here's how we can do
+that:
 
 ```javascript
 import { ROUTE_CHANGED } from 'redux-routable'
@@ -391,32 +391,36 @@ the middleware, so they will never reach your reducers or other middleware.
 
 ### Helpers
 
-- `paramsReducer(route, [awayVal=null], paramsSelector)`
+- `match(route, matchable)`
+
+  This function will return whether a `route` matches a `matchable`.
+
+- `paramsReducer(matchable, [awayVal=null], paramsSelector)`
 
   This function creates a reducer that evaluates `paramsSelector` against the
   `payload.params` of a `ROUTE_CHANGED` action when navigated to the specified
-  `route`. When navigated away from `route`, the reducer will evaluate to
-  `awayVal`.
+  `matchable`. When navigated away from `matchable`, the reducer will evaluate
+  to `awayVal`.
 
-- `changedTo(route)`
+- `changedTo(matchable)`
 
-  This function takes a route name and returns a predicate that evaluates to
-  `true` when passed a `ROUTE_CHANGED` action that matches the `route` and
+  This function takes a "matchable" and returns a predicate that evaluates to
+  `true` when passed a `ROUTE_CHANGED` action that matches `matchable` and
   evaluates to `false` otherwise.
 
-- `entered(route)`
+- `entered(matchable)`
 
-  This function takes a route name and returns a predicate that evaluates to
-  `true` when passed a `ROUTE_CHANGED` action where `route` was "entered" (the
-  previous `ROUTE_CHANGED` action does not match `route`, but the current one
-  does) and evaluates to `false` otherwise.
+  This function takes a "matchable" and returns a predicate that evaluates to
+  `true` when passed a `ROUTE_CHANGED` action where `matchable` was "entered"
+  (the previous `ROUTE_CHANGED` action does not match `matchable`, but the
+  current one does) and evaluates to `false` otherwise.
 
-- `exited(route)`
+- `exited(matchable)`
 
-  This function takes a route name and returns a predicate that evaluates to
-  `true` when passed a `ROUTE_CHANGED` action where `route` was "exited" (the
-  previous `ROUTE_CHANGED` action matches `route`, but the current one does not)
-  and evaluates to `false` otherwise.
+  This function takes a "matchable" and returns a predicate that evaluates to
+  `true` when passed a `ROUTE_CHANGED` action where `matchable` was "exited"
+  (the previous `ROUTE_CHANGED` action matches `matchable`, but the current one
+  does not) and evaluates to `false` otherwise.
 
-The `route` parameter of all of the helper functions can be either a single
-route name or an array of route names.
+The `matchable` parameter of all of the helper functions can be either a route
+name, an array of route names, or a Redux Routable config object.

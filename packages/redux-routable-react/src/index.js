@@ -12,6 +12,7 @@ import {
   RouteMatchError,
   Router,
   locationToRoute,
+  match,
   open,
   push,
   replace,
@@ -68,24 +69,18 @@ Routable.propTypes = {
 }
 
 // Match Component
-export const Match = ({ route, children }) => {
+export const Match = ({ on, children }) => {
   const currentRoute = useContext(CurrentRouteContext)
 
   if (currentRoute === null) {
     return null
   }
 
-  const routes = route instanceof Array ? route : [route]
-  const match = routes.includes(currentRoute.name)
-
-  return match ? children : null
+  return match(currentRoute.name, on) ? children : null
 }
 
 Match.propTypes = {
-  route: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string),
-  ]).isRequired,
+  on: PropTypes.any.isRequired,
   children: PropTypes.node.isRequired,
 }
 

@@ -19,6 +19,7 @@ import {
   go,
   goBack,
   goForward,
+  match,
   open,
   paramsReducer,
   push,
@@ -219,6 +220,27 @@ describe('helpers', () => {
       false,
       true,
     ])
+  })
+
+  test('match() matches on a single route', () => {
+    const route = 'home'
+
+    expect(match(route, 'home')).toBe(true)
+    expect(match(route, 'cart')).toBe(false)
+  })
+
+  test('match() matches on multiple routes', () => {
+    const route = 'home'
+
+    expect(match(route, ['home', 'cart'])).toBe(true)
+    expect(match(route, ['cart', 'search'])).toBe(false)
+  })
+
+  test('match() matches on a Router', () => {
+    const route = 'users'
+
+    expect(match(route, userRouter)).toBe(true)
+    expect(match(route, accountRouter)).toBe(false)
   })
 })
 

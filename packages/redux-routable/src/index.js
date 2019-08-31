@@ -161,13 +161,31 @@ export function Router(children) {
 }
 
 // Helpers
-export const paramsReducer = (route, ...rest) => {
+export const match = (route, matchable) => {
+  if (typeof matchable === 'object') {
+    switch (matchable.constructor) {
+      case Route:
+      case Fallback:
+        return match(route, matchable.name)
+      case Router:
+      case Scope:
+        return match(route, matchable.children)
+      case Array:
+        return matchable.some(child => match(route, child))
+      default:
+        return route === matchable
+    }
+  } else {
+    return route === matchable
+  }
+}
+
+export const paramsReducer = (matchable, ...rest) => {
   const [awayVal, paramsSelector] = rest.length === 1 ? [null, ...rest] : rest
-  const routes = route instanceof Array ? route : [route]
 
   return (state = awayVal, { type, payload }) => {
     if (type === ROUTE_CHANGED) {
-      if (routes.includes(payload.route)) {
+      if (match(payload.route, matchable)) {
         return paramsSelector(payload.params)
       } else {
         return awayVal
@@ -178,30 +196,18 @@ export const paramsReducer = (route, ...rest) => {
   }
 }
 
-export const changedTo = route => {
-  const routes = route instanceof Array ? route : [route]
+export const changedTo = matchable => ({ type, payload }) =>
+  type === ROUTE_CHANGED && match(payload.route, matchable)
 
-  return ({ type, payload }) =>
-    type === ROUTE_CHANGED && routes.includes(payload.route)
-}
+export const entered = matchable => ({ type, payload, meta }) =>
+  type === ROUTE_CHANGED &&
+  match(payload.route, matchable) &&
+  (meta.previous === undefined || !match(meta.previous.route, matchable))
 
-export const entered = route => {
-  const routes = route instanceof Array ? route : [route]
-
-  return ({ type, payload, meta }) =>
-    type === ROUTE_CHANGED &&
-    routes.includes(payload.route) &&
-    (meta.previous === undefined || !routes.includes(meta.previous.route))
-}
-
-export const exited = route => {
-  const routes = route instanceof Array ? route : [route]
-
-  return ({ type, payload, meta }) =>
-    type === ROUTE_CHANGED &&
-    !routes.includes(payload.route) &&
-    (meta.previous !== undefined && routes.includes(meta.previous.route))
-}
+export const exited = matchable => ({ type, payload, meta }) =>
+  type === ROUTE_CHANGED &&
+  !match(payload.route, matchable) &&
+  (meta.previous !== undefined && match(meta.previous.route, matchable))
 
 // Utilities
 const getPathParamNames = path =>
