@@ -138,7 +138,7 @@ Link = React.forwardRef(Link)
 Link.propTypes = {
   action: PropTypes.oneOf(['push', 'replace', 'open']),
   route: PropTypes.string.isRequired,
-  params: PropTypes.objectOf(PropTypes.string),
+  params: PropTypes.objectOf(PropTypes.any),
   hash: PropTypes.string,
   target: PropTypes.string,
   onClick: PropTypes.func,

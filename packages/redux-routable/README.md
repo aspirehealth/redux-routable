@@ -326,7 +326,7 @@ the middleware, so they will never reach your reducers or other middleware.
     type: ROUTE_CHANGED,
     payload: {
       route: ..., // Route name
-      params: { ... }, // Path and query params (string values)
+      params: { ... }, // Path and query params
       hash: ... // Fragment identifier
     },
     meta: {
@@ -338,8 +338,7 @@ the middleware, so they will never reach your reducers or other middleware.
   `payload.params` is populated by both path params (parsed with
   [`path-to-regexp`](https://www.npmjs.com/package/path-to-regexp)) and query
   params (parsed with
-  [`query-string`](https://www.npmjs.com/package/query-string)). Since
-  parameters come from the location string, all values will be strings.
+  [`query-string`](https://www.npmjs.com/package/query-string)).
 
 - `ROUTE_NOT_MATCHED`
 
