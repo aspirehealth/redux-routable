@@ -87,14 +87,28 @@ routes:
 const App = () => (
   <React.Fragment>
     <Match on="home">I am on the home page!</Match>
-    <Match on={['cart', 'search']}>I am on another page!</Match>
+    <Match on={['cart', 'search']}>I am on the cart or search page!</Match>
   </React.Fragment>
 )
 ```
 
 Now, if the location was `/`, you would still see `I am on the home page!`, but
-if the location was `/cart` or `/search/widgets`, you would see `I am on another
-page!`.
+if the location was `/cart` or `/search/widgets`, you would see `I am on the
+cart or search page!`.
+
+Additionally, you can invert the match condition using the `invert` prop:
+
+```javascript
+const App = () => (
+  <React.Fragment>
+    <Match on="home">I am on the home page!</Match>
+    <Match invert on="home">I am not on the home page!</Match>
+  </React.Fragment>
+)
+```
+
+You would still see `I am on the home page!` if the location was `/`, but if the
+location was anything else, you would see `I am not on the home page!`.
 
 ### Using the `<Link>` Component
 
@@ -160,10 +174,11 @@ Component used to conditionally render content depending on the current route.
 
 #### Props
 
-| Name         | Type   | Description                                                                                                                    |
-| ------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| `on *`       | `any`  | A "matchable" value (route name, array of route names, or Redux Routable config object) to match against the current location. |
-| `children *` | `node` | The children to be rendered if `on` matches the current location.                                                              |
+| Name         | Type   | Default | Description                                                                                                                    |
+| ------------ | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `invert`     | `bool` | `false` | A flag that determines whether to invert the match.                                                                            |
+| `on *`       | `any`  |         | A "matchable" value (route name, array of route names, or Redux Routable config object) to match against the current location. |
+| `children *` | `node` |         | The children to be rendered if the the current location is matched.                                                            |
 
 ### `<Link>`
 

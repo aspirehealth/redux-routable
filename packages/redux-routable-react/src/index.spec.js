@@ -99,6 +99,21 @@ describe('Match', () => {
     expect(matches.render()).toBe('home')
   })
 
+  test('renders correct content when inverted', () => {
+    const { history, make } = mocks()
+    const match = make(
+      <Match invert on="home">
+        matched
+      </Match>,
+    )
+
+    expect(match.render()).toBe(null)
+    act(() => history.replace('/search/widgets'))
+    expect(match.render()).toBe('matched')
+    act(() => history.replace('/'))
+    expect(match.render()).toBe(null)
+  })
+
   test('does not render when location does not match a route', () => {
     const historyOptions = { initialEntries: ['/nonsense'] }
     const { history, make } = mocks({ historyOptions })

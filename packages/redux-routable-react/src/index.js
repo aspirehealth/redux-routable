@@ -63,19 +63,28 @@ Routable.propTypes = {
 }
 
 // Match Component
-export const Match = ({ on, children }) => {
+export const Match = ({ invert, on, children }) => {
+  let matched
   const currentRoute = useContext(CurrentRouteContext)
 
   if (currentRoute === null) {
     return null
   }
 
-  return match(currentRoute.name, on) ? children : null
+  matched = match(currentRoute.name, on)
+  matched = invert ? !matched : matched
+
+  return matched ? children : null
 }
 
 Match.propTypes = {
+  invert: PropTypes.bool,
   on: PropTypes.any.isRequired,
   children: PropTypes.node.isRequired,
+}
+
+Match.defaultProps = {
+  invert: false,
 }
 
 // Link Component
