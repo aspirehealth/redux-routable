@@ -1,11 +1,5 @@
 import PropTypes from 'prop-types'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import {
   LocationMatchError,
@@ -110,25 +104,22 @@ export let Link = ({ action, route, params, hash, onClick, ...props }, ref) => {
   const href = history.createHref(location)
   const target = props.target || '_self'
 
-  const handleClick = useCallback(
-    event => {
-      if (onClick) onClick(event)
+  const handleClick = event => {
+    if (onClick) onClick(event)
 
-      if (
-        !event.defaultPrevented &&
-        event.button === 0 &&
-        target === '_self' &&
-        !isModifiedEvent(event)
-      ) {
-        const actionCreator = linkActionCreators[action]
-        const linkAction = actionCreator(route, params, hash)
+    if (
+      !event.defaultPrevented &&
+      event.button === 0 &&
+      target === '_self' &&
+      !isModifiedEvent(event)
+    ) {
+      const actionCreator = linkActionCreators[action]
+      const linkAction = actionCreator(route, params, hash)
 
-        event.preventDefault()
-        dispatch(linkAction)
-      }
-    },
-    [onClick, target, action, route, params, hash, dispatch],
-  )
+      event.preventDefault()
+      dispatch(linkAction)
+    }
+  }
 
   return <a {...props} ref={ref} href={href} onClick={handleClick} />
 }

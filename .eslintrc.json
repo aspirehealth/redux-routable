@@ -1,11 +1,16 @@
 {
   "parser": "babel-eslint",
+  "plugins": ["react-hooks"],
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended",
     "plugin:jest/recommended",
     "plugin:react/recommended"
   ],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
   "globals": {
     "window": true,
     "console": true
