@@ -11,7 +11,7 @@ and actions will be dispatched whenever the route changes.
 - Dispatch [navigation actions](#navigation-action-creators) to change the
   location, open a route in a new tab, or go back or forward in history.
 - Listen for the [`ROUTE_CHANGED`](#action-types) action in your reducers to
-  persist and execute side effects for the route and parameters.
+  persist state and execute side effects for the route, parameters, and hash.
 
 ## Installation
 
@@ -20,17 +20,18 @@ npm install --save redux-routable
 ```
 
 Along with installing this package, you'll also need to have
-[`redux`](https://www.npmjs.com/package/redux#installation) and
-[`history`](https://www.npmjs.com/package/history#installation) installed.
+[`redux`](https://www.npmjs.com/package/redux) and
+[`history`](https://www.npmjs.com/package/history) installed.
 
 ## Usage
 
-Given that Redux Routable is Redux middleware, you'll need to have the `redux`
+Given that Redux Routable is a Redux middleware, you'll need to have the `redux`
 package installed. You'll also need the `history` package, which provides
 uniform API for navigating between locations across different environments. Read
-the ["Usage"](https://www.npmjs.com/package/history#usage) section of their
-README to decide how you'd like to create the `history` object (using
-`createBrowserHistory`, `createMemoryHistory`, or `createHashHistory`).
+the
+["Intro"](https://github.com/ReactTraining/history/blob/master/docs/GettingStarted.md#intro)
+section of their docs to decide how you'd like to create the `history` object
+(using `createBrowserHistory`, `createMemoryHistory`, or `createHashHistory`).
 
 ### Defining a Router
 
@@ -53,7 +54,7 @@ const router = Router([
 From this configuration, we get an overview of what we can define in our router
 with Redux Routable. We have named `Route`s that match on path patterns,
 `Redirect`s that take us from a path pattern to a defined route, `Scope`s that
-allow us to nest routers, and `Fallback`s that let us match when nothing else
+allow us to nest `Router`s, and `Fallback`s that let us match when nothing else
 does. For more information, refer to the ["Router Configuration
 Constructors"](#router-configuration-constructors) section.
 
@@ -75,7 +76,9 @@ const store = createStore(reducer, applyMiddleware(middleware))
 ### Initializing Your Application with the `SYNC` Action
 
 Now that we have our Redux store, we can dispatch some actions. The first action
-we'll want to dispatch is the `SYNC` action provided by Redux Routable:
+we'll want to dispatch is the `SYNC` action provided by Redux Routable, which we
+can create with the `sync` [action
+creator](https://redux.js.org/basics/actions#action-creators):
 
 ```javascript
 import { sync } from 'redux-routable'
@@ -97,14 +100,16 @@ dispatched that corresponds to the current location:
 Since we're using `createMemoryHistory`, the location defaults to `/`, and the
 `ROUTE_CHANGED` action says that the route has been changed to `home`. You'll
 want to dispatch the `SYNC` action at the start of your application, so that
-reducers and other middleware can synchronize themselves to the current route
-and parameters.
+reducers and other middleware can synchronize themselves to the current route,
+parameters, and hash.
 
 ### Dispatching Navigation Actions
 
-If we want to programmatically navigate within our application, we can call any
-of the navigation actions (`PUSH`, `REPLACE`, `OPEN`, `GO`, `GO_BACK`,
-`GO_FORWARD`). We'll use the `PUSH` action as an example:
+If we want to programmatically navigate within our application, we can dispatch
+any of the navigation actions (`PUSH`, `REPLACE`, `OPEN`, `GO`, `GO_BACK`,
+`GO_FORWARD`). Just like the `SYNC` action, these actions can only be created
+with their corresponding action creators. We'll use the `PUSH` action as an
+example:
 
 ```javascript
 import { push } from 'redux-routable'
@@ -125,15 +130,22 @@ This will do 2 things:
 }
 ```
 
-All the other navigation actions (with the exception of `OPEN`) will have the
-same effect: dispatch a navigation action, the location will change, and a
-`ROUTE_CHANGED` action will be dispatched.
+All of the other navigation actions (with the exception of `OPEN`) will have the
+same flow:
+
+- Dispatch a navigation action.
+- The location will be changed.
+- A `ROUTE_CHANGED` action will be dispatched.
+
+The `OPEN` action is an exception to this flow, as dispatching this action will
+cause a new window or tab to be opened instead of changing the location.
 
 ### Handling `ROUTE_CHANGED` Actions
 
-In order to use information from the location in your reducers or middleware,
-you need to listen to the `ROUTE_CHANGED` action. If we want to keep track of
-the current route, we can do so easily:
+In order to use information from the location (route, params, and hash) in your
+reducers or middleware, you need to listen to the `ROUTE_CHANGED` action that
+gets dispatched by the middleware. If we want to keep track of the current
+route, we can do so easily:
 
 ```javascript
 import { ROUTE_CHANGED } from 'redux-routable'
@@ -267,13 +279,15 @@ documentation for path syntax.
 
 ### Action Creators
 
-All of the actions created by action creators in this section get "caught" by
-the middleware, so they will never reach your reducers or other middleware.
+Actions created by action creators in this section get "caught" by the
+middleware in order to execute navigation side effects. They do not have their
+types exposed as they are not meant to be handled by your reducers or other
+middleware.
 
 - `sync()`
 
-  Dispatching this action is useful at the very start of your application, as it
-  will cause a `ROUTE_CHANGED` action to be dispatched that corresponds to the
+  Dispatching this action is useful at the start of your application, as it will
+  cause a `ROUTE_CHANGED` action to be dispatched that corresponds to the
   current location, which will give your reducers and other middleware an
   opportunity to synchronize with the current route.
 
@@ -310,6 +324,10 @@ the middleware, so they will never reach your reducers or other middleware.
   stack.
 
 ### Action Types
+
+Actions with types in this section are created and dispatched by the middleware
+and are intended to be handled by your reducers or other middleware. They do not
+have action creators exposed as they are not meant to be manually constructed.
 
 - `ROUTE_CHANGED`
 
@@ -385,8 +403,8 @@ the middleware, so they will never reach your reducers or other middleware.
 
   `meta.location` will be the location that failed to match as provided by the
   `history` package. Read the
-  ["Properties"](https://github.com/ReactTraining/history#properties) section of
-  their README to see the properties on this object.
+  ["Properties"](https://github.com/ReactTraining/history/blob/master/docs/GettingStarted.md#properties)
+  section of their README to see the properties on this object.
 
 ### Helpers
 
