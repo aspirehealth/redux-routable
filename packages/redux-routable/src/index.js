@@ -1,5 +1,6 @@
 import {
   compile as compilePath,
+  match as matchPath,
   parse as parsePath,
   pathToRegexp,
 } from 'path-to-regexp'
@@ -217,7 +218,7 @@ export const exited = matchable => ({ type, payload, meta }) =>
 // Utilities
 const getPathParamNames = path =>
   parsePath(path)
-    .filter(token => token instanceof Object)
+    .slice(1)
     .map(token => token.name)
 
 const keyFilter = (object, condition) =>
@@ -258,13 +259,7 @@ export const locationToRoute = (router, { pathname, search, hash }) => {
     throw new LocationMatchError(`No route matching location path: ${pathname}`)
   }
 
-  const pathParamNames = getPathParamNames(route.path)
-  const pathParamValues = route.pattern.exec(pathname).slice(1)
-  const pathParams = pathParamNames.reduce((params, name, index) => {
-    const value = pathParamValues[index]
-    if (value !== undefined) params[name] = value
-    return params
-  }, {})
+  const pathParams = matchPath(route.path)(pathname).params
   const queryParams = parseQuery(search)
   const params = { ...pathParams, ...queryParams }
 
