@@ -1,5 +1,9 @@
-import pathToRegexp from 'path-to-regexp'
-import queryString from 'query-string'
+import {
+  compile as compilePath,
+  parse as parsePath,
+  pathToRegexp,
+} from 'path-to-regexp'
+import { parse as parseQuery, stringify as stringifyQuery } from 'query-string'
 
 // Errors
 export class RouteMatchError extends Error {}
@@ -207,12 +211,12 @@ export const entered = matchable => ({ type, payload, meta }) =>
 export const exited = matchable => ({ type, payload, meta }) =>
   type === ROUTE_CHANGED &&
   !match(payload.route, matchable) &&
-  (meta.previous !== undefined && match(meta.previous.route, matchable))
+  meta.previous !== undefined &&
+  match(meta.previous.route, matchable)
 
 // Utilities
 const getPathParamNames = path =>
-  pathToRegexp
-    .parse(path)
+  parsePath(path)
     .filter(token => token instanceof Object)
     .map(token => token.name)
 
@@ -235,11 +239,11 @@ export const routeToLocation = (router, name, params, hash) => {
   const pathParamNames = getPathParamNames(route.path)
   const pathParams = keyFilter(params, key => pathParamNames.includes(key))
   const queryParams = keyFilter(params, key => !pathParamNames.includes(key))
-  const search = queryString.stringify(queryParams)
+  const search = stringifyQuery(queryParams)
   let pathname
 
   try {
-    pathname = pathToRegexp.compile(route.path)(pathParams)
+    pathname = compilePath(route.path)(pathParams)
   } catch (error) {
     throw new RouteMatchError(error.message)
   }
@@ -261,7 +265,7 @@ export const locationToRoute = (router, { pathname, search, hash }) => {
     if (value !== undefined) params[name] = value
     return params
   }, {})
-  const queryParams = queryString.parse(search)
+  const queryParams = parseQuery(search)
   const params = { ...pathParams, ...queryParams }
 
   return { route, params, hash }
