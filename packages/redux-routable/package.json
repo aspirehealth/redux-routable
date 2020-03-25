@@ -16,9 +16,9 @@
     ]
   },
   "dependencies": {
-    "@babel/runtime": "^7.8.3",
+    "@babel/runtime": "^7.9.2",
     "path-to-regexp": "^6.1.0",
-    "query-string": "^6.10.1"
+    "query-string": "^6.11.1"
   },
   "peerDependencies": {
     "history": "^4.9.0"
