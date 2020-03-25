@@ -6,7 +6,13 @@
   "author": "Jamin Thornsberry",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf lib && babel src --root-mode upward --out-dir lib --ignore '**/*.spec.js'"
+    "build": "rimraf src && babel lib --root-mode upward --out-dir src --ignore '**/*.spec.js' && pika build"
+  },
+  "@pika/pack": {
+    "pipeline": [
+      ["@pika/plugin-standard-pkg"],
+      ["@pika/plugin-build-web"]
+    ]
   },
   "dependencies": {
     "@babel/runtime": "^7.8.3",
