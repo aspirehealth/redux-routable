@@ -1,6 +1,6 @@
 {
   "name": "redux-routable-react",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "React Components for Redux Routable",
   "author": "Jamin Thornsberry",
   "license": "MIT",
@@ -22,6 +22,6 @@
   "peerDependencies": {
     "react": "^16.8.0",
     "react-redux": "^7.1.0",
-    "redux-routable": "^1.0.4"
+    "redux-routable": "^1.0.5"
   }
 }
