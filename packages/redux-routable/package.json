@@ -2,15 +2,16 @@
   "name": "redux-routable",
   "version": "1.0.4",
   "description": "Simple Routing Middleware for Redux",
-  "main": "lib/index.js",
   "author": "Jamin Thornsberry",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf src && babel lib --root-mode upward --out-dir src --ignore '**/*.spec.js' && pika build"
+    "test": "jest",
+    "build": "rimraf src && babel lib --out-dir src --ignore '**/*.spec.js' && pika build"
   },
   "@pika/pack": {
     "pipeline": [
       ["@pika/plugin-standard-pkg"],
+      ["@pika/plugin-build-node"],
       ["@pika/plugin-build-web"]
     ]
   },
